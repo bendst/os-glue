@@ -1,0 +1,12 @@
+[package]
+name = "os-glue"
+version = "0.1.0"
+authors = ["Ben Stuart <mail@bstuart.de>"]
+
+[dependencies]
+
+[features]
+default = []
+std = []
+riot = []
+
