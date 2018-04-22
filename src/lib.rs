@@ -22,14 +22,6 @@ pub mod thread;
 #[cfg(any(feature = "riot", feature = "std"))]
 pub mod sync;
 
-fn t() {
-    use self::thread::BuilderExt;
-    use self::thread::Builder;
-
-    let a : Builder = BuilderExt::<()>::new();
-
-    a.spawn(|| ());
-}
 
 #[cfg(test)]
 mod tests {

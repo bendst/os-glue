@@ -1,4 +1,5 @@
 // TODO generate functions and structures
+#[allow(dead_code)]
 pub mod ffi {
     use core::mem;
 

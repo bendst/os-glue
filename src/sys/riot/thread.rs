@@ -6,6 +6,8 @@ use alloc::vec::Vec;
 
 use core::ptr;
 
+#[allow(dead_code)]
+#[allow(non_camel_case_types)]
 mod ffi {
     pub type kernel_pid_t = i16;
     pub type thread_task_func_t = extern "C" fn(*mut u8) -> *mut u8;
