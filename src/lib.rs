@@ -7,6 +7,7 @@
 #![feature(used)]
 extern crate alloc;
 
+extern crate embedded_types;
 
 mod sys;
 
@@ -21,6 +22,10 @@ pub mod thread;
 
 #[cfg(any(feature = "riot", feature = "std"))]
 pub mod sync;
+
+//#[cfg(any(feature = "riot", feature = "std"))]
+//pub mod net;
+
 
 
 #[cfg(test)]

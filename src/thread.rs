@@ -79,14 +79,26 @@ pub enum SpawnError {
 pub trait BuilderExt<T>
 where
     T: Send + 'static,
+    Self: Sized,
 {
     type JoinHandle: Send + 'static;
 
     fn new() -> Self;
+    
     fn name(self, name: &'static str) -> Self;
-    fn stack_size(self, stack_size: i32) -> Self;
-    fn priority(self, priority: u8) -> Self;
-    fn flags(self, flags: i32) -> Self;
+    
+    fn stack_size(self, _stack_size: i32) -> Self {
+        self
+    }
+    
+    fn priority(self, _priority: u8) -> Self {
+        self
+    }
+    
+    fn flags(self, _flags: i32) -> Self {
+        self
+    }
+
     fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, SpawnError>
     where
         F: FnOnce() -> T,

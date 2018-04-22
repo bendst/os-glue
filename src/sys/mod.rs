@@ -27,15 +27,6 @@ mod std_x86_64 {
         fn stack_size(self, stack_size: i32) -> Self {
             Builder::stack_size(self, stack_size as _)
         }
-
-        fn priority(self, _priority: u8) -> Self {
-            self
-        }
-
-        fn flags(self, _flags: i32) -> Self {
-            self
-        }
-
         fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, thread::SpawnError>
         where
             F: FnOnce() -> T,
