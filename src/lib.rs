@@ -5,9 +5,13 @@
 #![feature(alloc)]
 #![feature(fnbox)]
 #![feature(used)]
+#![feature(const_fn)]
 extern crate alloc;
 
 extern crate embedded_types;
+
+#[cfg(feature="riot")]
+extern crate riot_sys;
 
 mod sys;
 

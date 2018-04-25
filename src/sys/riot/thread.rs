@@ -6,35 +6,14 @@ use alloc::vec::Vec;
 
 use core::ptr;
 
-#[allow(dead_code)]
-#[allow(non_camel_case_types)]
-mod ffi {
-    pub type kernel_pid_t = i16;
-    pub type thread_task_func_t = extern "C" fn(*mut u8) -> *mut u8;
+use riot_sys::ffi;
 
-    extern "C" {
-        pub static sched_active_pid: kernel_pid_t;
-        pub fn thread_yield();
-        pub fn thread_sleep();
-        pub fn thread_wakeup(id: kernel_pid_t) -> i32;
-        pub fn thread_create(
-            stack: *mut u8,
-            stacksize: i32,
-            priority: u8,
-            flags: i32,
-            task_func: thread_task_func_t,
-            arg: *const u8,
-            name: *const u8,
-        ) -> kernel_pid_t;
-    }
-}
-
-pub struct JoinHandle<T> {
-    _marker: PhantomData<T>,
+pub struct JoinHandle<T = ()> {
     thread: Thread,
     #[used]
     stack_buffer: Vec<u8>,
-    result: Option<T>,
+    result: Option<()>,
+    _marker: PhantomData<T>,
 }
 
 impl<T> JoinHandle<T> {
@@ -42,7 +21,7 @@ impl<T> JoinHandle<T> {
         &self.thread
     }
 
-    pub fn join(self) -> T {
+    pub fn join(self) -> () {
         let mut this = self;
         this.result.take().unwrap()
     }
@@ -92,16 +71,14 @@ pub fn park_timeout(_duration: Duration) {
 }
 
 
-unsafe fn spawn_inner<'a, T>(
-    f: Box<FnBox() -> T + Send + 'a>,
+unsafe fn spawn_inner<'a>(
+    f: Box<FnBox() -> () + Send + 'a>,
     name: &'static str,
     stack_size: i32,
     flags: i32,
     priority: u8,
-) -> Result<JoinHandle<T>, thread::SpawnError>
-where
-    T: Send + 'static,
-{
+) -> Result<JoinHandle<()>, thread::SpawnError> {
+
     let f = Box::new(f);
     let param_ptr = &*f as *const _ as *mut _;
 
@@ -112,12 +89,14 @@ where
         stack_size,
         priority,
         flags,
-        thread_start,
+        Some(thread_start),
         param_ptr,
         name.as_ptr(),
     );
 
-    extern "C" fn thread_start(main: *mut u8) -> *mut u8 {
+    assert!(id > 0, "thread id is invalid");
+
+    extern "C" fn thread_start(main: *mut ffi::c_void) -> *mut ffi::c_void {
         unsafe {
             let b = Box::from_raw(main as *mut Box<FnBox()>);
             b()
@@ -133,12 +112,11 @@ where
     })
 }
 
-pub fn spawn<F, B, T>(f: F) -> B::JoinHandle
+pub fn spawn<F, B>(f: F) -> B::JoinHandle
 where
-    F: FnOnce() -> T,
+    F: FnOnce(),
     F: Send + 'static,
-    T: Send + 'static,
-    B: BuilderExt<T>,
+    B: BuilderExt,
 {
     B::new().spawn(f).expect("thread spawn failed")
 }
@@ -160,14 +138,12 @@ use thread::BuilderExt;
 use thread;
 
 
-impl<T> BuilderExt<T> for Builder
-where
-    T: Send + 'static,
-{
-    type JoinHandle = thread::JoinHandle<T>;
+impl BuilderExt for Builder {
+    type JoinHandle = thread::JoinHandle;
     fn new() -> Self {
         Builder { ..Default::default() }
     }
+
     fn name(mut self, name: &'static str) -> Self {
         self.name = Some(name);
         self
@@ -190,7 +166,7 @@ where
 
     fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, thread::SpawnError>
     where
-        F: FnOnce() -> T,
+        F: FnOnce() -> (),
         F: Send + 'static,
     {
         let Builder {
@@ -201,8 +177,8 @@ where
         } = self;
 
         let name = name.unwrap_or("rust_thread");
-        let stack_size = stack_size.unwrap_or(256);
-        let flags = flags.unwrap(); // TODO
+        let stack_size = stack_size.unwrap_or(512);
+        let flags = flags.unwrap_or(0);
         let priority = priority.unwrap(); //   TODO
 
         unsafe { spawn_inner(Box::new(f), name, stack_size, flags, priority).map(From::from) }

@@ -6,8 +6,13 @@ authors = ["Ben Stuart <mail@bstuart.de>"]
 [dependencies]
 embedded_types = "0.3.2"
 
+[dependencies.riot-sys]
+git = "https://www.bstuart.de/git/bendst/riot-sys.git"
+optional = true
+
 [features]
 default = []
 std = []
-riot = []
+riot = ["riot-sys"]
+riot_samr21-xpro = ["riot-sys/samr21-xpro", "riot"]
 

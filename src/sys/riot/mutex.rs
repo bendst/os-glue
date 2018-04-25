@@ -1,28 +1,5 @@
-// TODO generate functions and structures
-#[allow(dead_code)]
-pub mod ffi {
-    use core::mem;
 
-    #[repr(C)]
-    struct list_node_t {
-        next: *mut list_node_t,
-    }
-
-    #[repr(C)]
-    pub struct mutex_t {
-        queue: list_node_t,
-    }
-
-    extern "C" {
-        pub fn _mutex_lock(mutex: *mut mutex_t, blocking: i32) -> i32;
-        pub fn mutex_unlock(mutex: *mut mutex_t);
-        pub fn mutex_unlock_and_sleep(mutex: *mut mutex_t);
-    }
-
-    pub unsafe fn mutex_init(mutex: *mut mutex_t) {
-        *mutex = mem::zeroed()
-    }
-}
+use riot_sys::ffi;
 
 use core::mem;
 use core::cell::UnsafeCell;

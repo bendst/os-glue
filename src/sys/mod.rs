@@ -11,11 +11,8 @@ mod std_x86_64 {
 
     use thread;
 
-    impl<T> thread::BuilderExt<T> for Builder
-    where
-        T: Send + 'static,
-    {
-        type JoinHandle = thread::JoinHandle<T>;
+    impl thread::BuilderExt for Builder {
+        type JoinHandle = thread::JoinHandle;
         fn new() -> Self {
             Builder::new()
         }
@@ -29,7 +26,7 @@ mod std_x86_64 {
         }
         fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, thread::SpawnError>
         where
-            F: FnOnce() -> T,
+            F: FnOnce() -> (),
             F: Send + 'static,
         {
             Builder::spawn(self, f)
@@ -38,12 +35,11 @@ mod std_x86_64 {
         }
     }
 
-    pub fn spawn<F, B, T>(f: F) -> B::JoinHandle
+    pub fn spawn<F, B>(f: F) -> B::JoinHandle
     where
-        F: FnOnce() -> T,
+        F: FnOnce() -> (),
         F: Send + 'static,
-        T: Send + 'static,
-        B: thread::BuilderExt<T>,
+        B: thread::BuilderExt,
     {
         B::new().spawn(f).expect("thread spawn failed")
     }
