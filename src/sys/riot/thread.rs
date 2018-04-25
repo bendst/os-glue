@@ -79,7 +79,10 @@ unsafe fn spawn_inner<'a>(
     priority: u32,
 ) -> Result<JoinHandle<()>, thread::SpawnError> {
 
-    let f = Box::new(f);
+    // Directly allocate our 'heap'
+    let f = box f;
+
+    // extract the parameters, which will be the environment of the closure
     let param_ptr = &*f as *const _ as *mut _;
 
     let mut buffer = Vec::with_capacity(stack_size as usize);
@@ -97,10 +100,7 @@ unsafe fn spawn_inner<'a>(
     assert!(id > 0, "thread id is invalid");
 
     extern "C" fn thread_start(main: *mut ffi::c_void) -> *mut ffi::c_void {
-        unsafe {
-            let b = Box::from_raw(main as *mut Box<FnBox()>);
-            b()
-        }
+        unsafe { Box::from_raw(main as *mut Box<FnBox()>)() }
         ptr::null_mut()
     }
 
@@ -180,8 +180,8 @@ impl BuilderExt for Builder {
         let stack_size = stack_size.unwrap_or(512);
         let flags = flags.unwrap_or(0);
         // TODO probably should warn about the default behaviour
-        let priority = priority.unwrap_or(ffi::THREAD_PRIORITY_MAIN - 1); 
+        let priority = priority.unwrap_or(ffi::THREAD_PRIORITY_MAIN - 1);
 
-        unsafe { spawn_inner(Box::new(f), name, stack_size, flags, priority).map(From::from) }
+        unsafe { spawn_inner(box f, name, stack_size, flags, priority).map(From::from) }
     }
 }

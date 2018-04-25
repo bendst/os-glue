@@ -16,8 +16,7 @@ impl Mutex {
     }
 
     pub unsafe fn lock(&self) {
-        let r = ffi::_mutex_lock(self.0.get(), 1);
-        debug_assert_eq!(r, 1);
+        ffi::mutex_lock(self.0.get());
     }
 
     pub unsafe fn unlock(&self) {
@@ -25,11 +24,11 @@ impl Mutex {
     }
 
     pub unsafe fn try_lock(&self) -> bool {
-        let r = ffi::_mutex_lock(self.0.get(), 0);
+        let r = ffi::mutex_trylock(self.0.get());
         match r {
             1 => true,
             0 => false,
-            _ => false,
+            _ => unreachable!(),
         }
     }
 

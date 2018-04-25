@@ -6,6 +6,7 @@
 #![feature(fnbox)]
 #![feature(used)]
 #![feature(const_fn)]
+#![feature(box_syntax)]
 extern crate alloc;
 
 extern crate embedded_types;

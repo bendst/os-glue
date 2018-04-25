@@ -51,13 +51,10 @@ impl<'a, T: ?Sized> Mutex<T> {
     }
 
     pub fn try_lock(&self) -> Result<MutexGuard<T>, TryLock> {
-        unsafe {
-            if self.lock.try_lock() {
-                self.lock.lock();
-                Ok(MutexGuard::new(self))
-            } else {
-                Err(TryLock::WouldBlock)
-            }
+        if unsafe { self.lock.try_lock() } {
+            Ok(MutexGuard::new(self))
+        } else {
+            Err(TryLock::WouldBlock)
         }
     }
 }
