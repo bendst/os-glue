@@ -76,7 +76,7 @@ unsafe fn spawn_inner<'a>(
     name: &'static str,
     stack_size: i32,
     flags: i32,
-    priority: u8,
+    priority: u32,
 ) -> Result<JoinHandle<()>, thread::SpawnError> {
 
     let f = Box::new(f);
@@ -87,7 +87,7 @@ unsafe fn spawn_inner<'a>(
     let id = ffi::thread_create(
         buffer.as_mut_ptr(),
         stack_size,
-        priority,
+        priority as _,
         flags,
         Some(thread_start),
         param_ptr,
@@ -130,7 +130,7 @@ pub fn yield_now() {
 pub struct Builder {
     name: Option<&'static str>,
     stack_size: Option<i32>,
-    priority: Option<u8>,
+    priority: Option<u32>,
     flags: Option<i32>,
 }
 
@@ -154,7 +154,7 @@ impl BuilderExt for Builder {
         self
     }
 
-    fn priority(mut self, priority: u8) -> Self {
+    fn priority(mut self, priority: u32) -> Self {
         self.priority = Some(priority);
         self
     }
@@ -179,7 +179,8 @@ impl BuilderExt for Builder {
         let name = name.unwrap_or("rust_thread");
         let stack_size = stack_size.unwrap_or(512);
         let flags = flags.unwrap_or(0);
-        let priority = priority.unwrap(); //   TODO
+        // TODO probably should warn about the default behaviour
+        let priority = priority.unwrap_or(ffi::THREAD_PRIORITY_MAIN - 1); 
 
         unsafe { spawn_inner(Box::new(f), name, stack_size, flags, priority).map(From::from) }
     }

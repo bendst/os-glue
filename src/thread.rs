@@ -89,7 +89,7 @@ where
         self
     }
 
-    fn priority(self, _priority: u8) -> Self {
+    fn priority(self, _priority: u32) -> Self {
         self
     }
 
