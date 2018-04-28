@@ -35,12 +35,13 @@ mod sys;
 #[cfg(any(feature = "riot", feature = "std"))]
 pub mod thread;
 
-#[cfg(any(feature = "riot", feature = "std"))]
 /// Provide syncronizations primitives of the underlying OS.
+#[cfg(any(feature = "riot", feature = "std"))]
 pub mod sync;
 
 
-#[cfg(not(feature = "std"))]
+/// Temporal quantification.
+#[cfg(any(feature = "std", feature = "riot"))]
 pub mod time;
 
 //#[cfg(any(feature = "riot", feature = "std"))]

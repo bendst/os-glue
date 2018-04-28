@@ -8,6 +8,7 @@ mod std_x86_64 {
                                 Thread, JoinHandle};
     pub use self::std::sync::Mutex;
     pub use self::std::time::Duration;
+    pub use self::std::time::Instant;
 
     use thread;
 

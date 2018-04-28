@@ -9,7 +9,7 @@ pub struct Instant {
 impl Instant {
     #[inline(always)]
     pub fn now() -> Instant {
-        let timestamp = unsafe { 
+        let timestamp = unsafe {
             let mut timestamp = ffi::timex_set(0, 0);
             ffi::xtimer_now_timex(&mut timestamp as *mut _);
             timestamp
@@ -21,7 +21,7 @@ impl Instant {
     pub fn duration_since(&self, earlier: Instant) -> Duration {
         let duration = unsafe { ffi::timex_sub(self.timestamp, earlier.timestamp) };
         // prevent overflowing by saturating
-        let nanos = duration.microseconds.saturating_mul(100);
+        let nanos = duration.microseconds.saturating_mul(1000);
         Duration::new(duration.seconds.into(), nanos)
     }
 
