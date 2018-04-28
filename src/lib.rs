@@ -47,7 +47,8 @@ pub mod time;
 //#[cfg(any(feature = "riot", feature = "std"))]
 //pub mod net;
 
-
+#[macro_use]
+mod io;
 
 #[cfg(test)]
 mod tests {

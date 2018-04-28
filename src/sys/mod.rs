@@ -44,6 +44,18 @@ mod std_x86_64 {
     {
         B::new().spawn(f).expect("thread spawn failed")
     }
+
+    use self::std::fmt;
+
+    pub(crate) fn print(args: fmt::Arguments)  {
+        use self::std::io::Write;
+        use self::std::io;
+
+        let stdout = io::stdout();
+        let mut guard = stdout.lock();
+
+        guard.write_fmt(args).unwrap()
+    }
 }
 
 #[cfg(all(target_arch = "arm", feature = "riot"))]
@@ -52,8 +64,13 @@ pub use self::riot::thread::*;
 pub use self::riot::mutex::*;
 #[cfg(all(target_arch = "arm", feature = "riot"))]
 pub use self::riot::time::*;
+#[cfg(all(target_arch = "arm", feature = "riot"))]
+#[allow(unused_imports)]
+pub(crate) use self::riot::io::print;
 
 
 
 #[cfg(all(not(target_arch = "arm"), feature = "std"))]
 pub use self::std_x86_64::*;
+#[cfg(all(not(target_arch = "arm"), feature = "std"))]
+pub(crate) use self::std_x86_64::print;
