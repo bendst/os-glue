@@ -55,7 +55,7 @@ pub fn current() -> Thread {
 }
 
 pub fn sleep(_duration: Duration) {
-    unimplemented!("RIOT does not support sleeps")
+    unimplemented!()
 }
 
 pub fn park() {

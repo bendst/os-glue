@@ -40,8 +40,8 @@ pub mod thread;
 pub mod sync;
 
 
-//#[cfg(not(feature = "std"))]
-//pub mod time;
+#[cfg(not(feature = "std"))]
+pub mod time;
 
 //#[cfg(any(feature = "riot", feature = "std"))]
 //pub mod net;

@@ -49,6 +49,9 @@ mod std_x86_64 {
 pub use self::riot::thread::*;
 #[cfg(all(target_arch = "arm", feature = "riot"))]
 pub use self::riot::mutex::*;
+#[cfg(all(target_arch = "arm", feature = "riot"))]
+pub use self::riot::time::*;
+
 
 
 #[cfg(all(not(target_arch = "arm"), feature = "std"))]
