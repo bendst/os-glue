@@ -1,18 +1,21 @@
 
 use riot_sys::ffi;
 
-use core::mem;
+use core::ptr;
 use core::cell::UnsafeCell;
 
 pub struct Mutex(UnsafeCell<ffi::mutex_t>);
 
 impl Mutex {
-    pub unsafe fn new() -> Self {
-        Mutex(UnsafeCell::new(mem::uninitialized()))
+    pub const unsafe fn new() -> Self {
+        Mutex(UnsafeCell::new(ffi::mutex_t {
+            queue: ffi::list_node { next: ptr::null_mut() },
+        }))
     }
 
+    #[allow(unused)]
     pub unsafe fn init(&mut self) {
-        ffi::mutex_init(self.0.get())
+        //ffi::mutex_init(self.0.get())
     }
 
     pub unsafe fn lock(&self) {

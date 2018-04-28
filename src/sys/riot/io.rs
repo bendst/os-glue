@@ -4,9 +4,9 @@ use sync::Mutex;
 use riot_sys::ffi;
 
 struct Writer;
-struct SyncWriter(Option<Mutex<Writer>>);
+struct SyncWriter(Mutex<Writer>);
 
-static mut WRITER: SyncWriter = SyncWriter(None);
+static WRITER: SyncWriter = SyncWriter(Mutex::new(Writer));
 
 impl fmt::Write for Writer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
@@ -19,8 +19,6 @@ impl fmt::Write for Writer {
 
 #[inline(always)]
 pub(crate) fn print(args: fmt::Arguments) {
-    // While still very unliky, we must initialize Mutex with Writer unsafely once,
-    // because the Mutex creation is not constant.
-    let mut writer = unsafe { WRITER.0.get_or_insert(Mutex::new(Writer)) }.lock();
+    let mut writer = WRITER.0.lock();
     writer.write_fmt(args).unwrap()
 }

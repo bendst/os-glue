@@ -38,15 +38,9 @@ pub struct MutexGuard<'lock, T: ?Sized + 'lock> {
 
 impl<T> Mutex<T> {
     /// Create a new unlocked mutex.
-    pub fn new(data: T) -> Self {
-        let lock = unsafe {
-            let mut lock = sys::Mutex::new();
-            lock.init();
-            lock
-        };
-
+    pub const fn new(data: T) -> Self {
         Mutex {
-            lock,
+            lock: unsafe {sys::Mutex::new()},
             data: UnsafeCell::new(data),
         }
     }

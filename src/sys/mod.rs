@@ -47,6 +47,7 @@ mod std_x86_64 {
 
     use self::std::fmt;
 
+    #[allow(dead_code)]
     pub(crate) fn print(args: fmt::Arguments)  {
         use self::std::io::Write;
         use self::std::io;
@@ -73,4 +74,5 @@ pub(crate) use self::riot::io::print;
 #[cfg(all(not(target_arch = "arm"), feature = "std"))]
 pub use self::std_x86_64::*;
 #[cfg(all(not(target_arch = "arm"), feature = "std"))]
+#[allow(unused_imports)]
 pub(crate) use self::std_x86_64::print;
