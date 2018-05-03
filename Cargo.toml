@@ -1,18 +1,15 @@
 [package]
 name = "os-glue"
-version = "0.1.0"
+version = "0.0.0"
 authors = ["Ben Stuart <mail@bstuart.de>"]
 
 [dependencies]
 embedded_types = "0.3.2"
 
-[dependencies.riot-sys]
-git = "https://www.bstuart.de/git/bendst/riot-sys.git"
-optional = true
+[target.'cfg(target_os="riot")'.dependencies]
+riot-sys = { git = "https://bstuart.de/git/bendst/riot-sys.git", path = "../riot-sys" }
 
 [features]
 default = []
 std = []
-riot = ["riot-sys"]
-riot_samr21-xpro = ["riot-sys/samr21-xpro", "riot"]
-
+samr21-xpro = ["riot-sys/samr21-xpro"]

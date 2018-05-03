@@ -1,5 +1,3 @@
-#![no_std]
-
 //! Provide obstractions for embedded OS.
 
 #![feature(alloc)]
@@ -7,22 +5,25 @@
 #![feature(used)]
 #![feature(const_fn)]
 #![feature(box_syntax)]
-extern crate alloc;
+#![no_std]
+
+
+#[cfg(target_os="none")]
+compile_error!(r#"No operating system detected."#);
 
 extern crate embedded_types;
-
-#[cfg(feature = "riot")]
+#[cfg(target_os = "riot")]
 extern crate riot_sys;
+extern crate alloc;
 
 
 /// Re-export of the underlying bindings.
 ///
 /// Expose constants and bindings.
 pub mod raw {
-    #[cfg(feature = "riot")]
+    #[cfg(target_os = "riot")]
     pub use riot_sys::ffi::*;
 }
-
 
 mod sys;
 
@@ -32,28 +33,16 @@ mod sys;
 /// * RIOT
 /// * Every OS supported by rust
 ///
-#[cfg(any(feature = "riot", feature = "std"))]
 pub mod thread;
 
 /// Provide syncronizations primitives of the underlying OS.
-#[cfg(any(feature = "riot", feature = "std"))]
 pub mod sync;
 
 
 /// Temporal quantification.
-#[cfg(any(feature = "std", feature = "riot"))]
 pub mod time;
 
-//#[cfg(any(feature = "riot", feature = "std"))]
 //pub mod net;
 
 #[macro_use]
 mod io;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

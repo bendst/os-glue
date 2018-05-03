@@ -1,8 +1,6 @@
-#[cfg(all(target_arch = "arm", not(feature = "std"), any(feature = "riot")))]
+// Only provide mutex for 'embedded'. In any other case just use the mutexes provided by rust.
+#[cfg(target_os="riot")]
 mod mutex;
 
-#[cfg(all(not(target_arch = "arm"), feature = "std"))]
-pub use sys::*;
-
-#[cfg(all(target_arch = "arm", not(feature = "std"), any(feature = "riot")))]
+#[cfg(target_os="riot")]
 pub use self::mutex::*;

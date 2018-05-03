@@ -40,7 +40,7 @@ impl<T> Mutex<T> {
     /// Create a new unlocked mutex.
     pub const fn new(data: T) -> Self {
         Mutex {
-            lock: unsafe {sys::Mutex::new()},
+            lock: unsafe { sys::Mutex::new() },
             data: UnsafeCell::new(data),
         }
     }

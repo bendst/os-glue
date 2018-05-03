@@ -15,7 +15,7 @@ impl Mutex {
 
     #[allow(unused)]
     pub unsafe fn init(&mut self) {
-        //ffi::mutex_init(self.0.get())
+        ffi::mutex_init(self.0.get())
     }
 
     pub unsafe fn lock(&self) {

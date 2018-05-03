@@ -82,3 +82,26 @@ impl Write for IoVec {
         Ok(amt)
     }
 }
+
+struct Error;
+trait SoSocketAddrs {}
+enum SocketAddr {
+    V4(),
+    V6(),
+}
+
+pub struct UdpSocket(sys::UdpSocket);
+
+impl UdpSocket {
+    pub fn bind<A: ToSocketAddrs>(addr: A) -> Result<UdpSocket, Error> {
+        unimplemented!()
+    }
+
+    pub fn recv_from(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr)> {
+        unimplemented!()
+    }
+
+    pub fn send_to<A: ToSocketAddrs>(&self, buf: &[u8], addr: A) -> Result<usize> {
+        unimplemented!()
+    }
+}
