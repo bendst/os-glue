@@ -2,6 +2,8 @@
 name = "os-glue"
 version = "0.0.0"
 authors = ["Ben Stuart <mail@bstuart.de>"]
+license = "MIT OR Apache-2.0"
+build = "build.rs"
 
 [dependencies]
 embedded_types = "0.3.2"
