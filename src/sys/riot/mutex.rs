@@ -14,18 +14,22 @@ impl Mutex {
     }
 
     #[allow(unused)]
+    #[inline]
     pub unsafe fn init(&mut self) {
         ffi::mutex_init(self.0.get())
     }
 
+    #[inline]
     pub unsafe fn lock(&self) {
         ffi::mutex_lock(self.0.get());
     }
 
+    #[inline]
     pub unsafe fn unlock(&self) {
         ffi::mutex_unlock(self.0.get());
     }
 
+    #[inline]
     pub unsafe fn try_lock(&self) -> bool {
         let r = ffi::mutex_trylock(self.0.get());
         match r {
@@ -35,5 +39,6 @@ impl Mutex {
         }
     }
 
+    #[inline]
     pub unsafe fn destroy(&self) {}
 }

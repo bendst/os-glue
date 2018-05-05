@@ -7,7 +7,7 @@ pub struct Instant {
 }
 
 impl Instant {
-    #[inline(always)]
+    #[inline]
     pub fn now() -> Instant {
         let timestamp = unsafe {
             let mut timestamp = ffi::timex_set(0, 0);
@@ -17,7 +17,7 @@ impl Instant {
         Instant { timestamp }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn duration_since(&self, earlier: Instant) -> Duration {
         let duration = unsafe { ffi::timex_sub(self.timestamp, earlier.timestamp) };
         // prevent overflowing by saturating
@@ -25,7 +25,7 @@ impl Instant {
         Duration::new(duration.seconds.into(), nanos)
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn elapsed(&self) -> Duration {
         let now = Instant::now();
         now.duration_since(*self)

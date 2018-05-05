@@ -17,10 +17,12 @@ pub struct JoinHandle<T = ()> {
 }
 
 impl<T> JoinHandle<T> {
+    #[inline]
     pub fn thread(&self) -> &Thread {
         &self.thread
     }
 
+    #[inline]
     pub fn join(self) -> () {
         let mut this = self;
         this.result.take().unwrap()
@@ -33,12 +35,14 @@ pub struct Thread {
 }
 
 impl Thread {
+    #[inline]
     pub fn unpark(&self) {
         unsafe {
             let _ = ffi::thread_wakeup(self.id.0);
         }
     }
 
+    #[inline]
     pub fn id(&self) -> ThreadId {
         self.id
     }
@@ -48,29 +52,36 @@ impl Thread {
 pub struct ThreadId(ffi::kernel_pid_t);
 
 
+#[inline]
 pub fn current() -> Thread {
     // RIOT does it the same way with an inlined function.
     let id = unsafe { ptr::read_volatile(&ffi::sched_active_pid as *const _) };
     Thread { id: ThreadId(id) }
 }
 
+#[inline]
 pub fn sleep(_duration: Duration) {
+    // TODO
     unimplemented!()
 }
 
+#[inline]
 pub fn park() {
     unsafe { ffi::thread_sleep() }
 }
 
+#[inline]
 pub fn panicking() -> bool {
     false
 }
 
+#[inline]
 pub fn park_timeout(_duration: Duration) {
     unimplemented!("RIOT does not support timeouts")
 }
 
 
+#[inline]
 unsafe fn spawn_inner<'a>(
     f: Box<FnBox() -> () + Send + 'a>,
     name: &'static str,
@@ -112,6 +123,7 @@ unsafe fn spawn_inner<'a>(
     })
 }
 
+#[inline]
 pub fn spawn<F, B>(f: F) -> B::JoinHandle
 where
     F: FnOnce(),
@@ -122,6 +134,7 @@ where
 }
 
 
+#[inline]
 pub fn yield_now() {
     unsafe { ffi::thread_yield() }
 }
@@ -140,30 +153,36 @@ use thread;
 
 impl BuilderExt for Builder {
     type JoinHandle = thread::JoinHandle;
+    #[inline]
     fn new() -> Self {
         Builder { ..Default::default() }
     }
 
+    #[inline]
     fn name(mut self, name: &'static str) -> Self {
         self.name = Some(name);
         self
     }
 
+    #[inline]
     fn stack_size(mut self, stack_size: i32) -> Self {
         self.stack_size = Some(stack_size);
         self
     }
 
+    #[inline]
     fn priority(mut self, priority: u32) -> Self {
         self.priority = Some(priority);
         self
     }
 
+    #[inline]
     fn flags(mut self, flags: i32) -> Self {
         self.flags = Some(flags);
         self
     }
 
+    #[inline]
     fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, thread::SpawnError>
     where
         F: FnOnce() -> (),

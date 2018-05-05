@@ -2,7 +2,7 @@
 
 Provide obstractions for embedded OS.
 
-# [Change log](CHANGELOG.md)
+# [Changelog](CHANGELOG.md)
 
 # License
 
