@@ -67,12 +67,21 @@ pub(crate) use self::std_x86_64::print;
 #[cfg(target_os="riot")]
 mod riot;
 
-#[cfg(target_os = "riot")]
-pub use self::riot::thread::*;
-#[cfg(target_os="riot")]
-pub use self::riot::mutex::*;
-#[cfg(target_os="riot")]
-pub use self::riot::time::*;
+
+macro_rules! pub_use {
+    ($meta: meta, $os: ident => $( $item: ident ),*) => {
+        $(
+            #[cfg($meta)]
+            pub use self::$os::$item::*;
+        )* 
+    };
+}
+
+pub_use! {
+    target_os = "riot",
+    riot => thread, net, mutex, time
+}
+
 #[cfg(target_os="riot")]
 #[allow(unused_imports)]
 pub(crate) use self::riot::io::print;

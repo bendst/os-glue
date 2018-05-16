@@ -9,12 +9,13 @@
 
 
 #[cfg(target_os="none")]
-compile_error!(r#"No operating system detected."#);
+compile_error!(r#"`os_glue` currently has no target os specified. Thats probably an error."#);
 
 extern crate embedded_types;
 #[cfg(target_os = "riot")]
 extern crate riot_sys;
 extern crate alloc;
+extern crate smoltcp;
 
 
 /// Re-export of the underlying bindings.
@@ -42,7 +43,7 @@ pub mod sync;
 /// Temporal quantification.
 pub mod time;
 
-//pub mod net;
+pub mod net;
 
 #[macro_use]
 mod io;

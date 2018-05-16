@@ -1,7 +1,10 @@
+pub use smoltcp::wire::{IpEndpoint, IpAddress, Ipv6Address, Ipv4Address};
+
 use embedded_types::io::Write;
 use embedded_types::io::Read;
 use embedded_types::io;
 
+use sys;
 use core::mem;
 use core::slice;
 use core::usize;
@@ -63,7 +66,7 @@ impl<'a> From<&'a mut [u8]> for &'a mut IoVec {
 
 pub trait Network: Write + Read {
     type Error;
-    fn send<R>(&mut self, buffer: Read) -> Result<usize, Self::Error>;
+    fn send<R>(&mut self, buffer: Read) -> ::core::result::Result<usize, Self::Error>;
     fn receive<W: Write>(&mut self, buffer: W);
 }
 
@@ -83,25 +86,48 @@ impl Write for IoVec {
     }
 }
 
-struct Error;
-trait SoSocketAddrs {}
-enum SocketAddr {
-    V4(),
-    V6(),
+pub enum ErrorKind {
+    OutOfMemory,
+    AddrInUse,
+    AfNoSupport,
+    InvalidInput,
+    WouldBlock,
 }
 
 pub struct UdpSocket(sys::UdpSocket);
 
+type Result<T = ()> = ::core::result::Result<T, ErrorKind>;
+
 impl UdpSocket {
-    pub fn bind<A: ToSocketAddrs>(addr: A) -> Result<UdpSocket, Error> {
-        unimplemented!()
+    pub fn bind<A>(addr: A) -> Result<UdpSocket>
+    where
+        A: Into<IpEndpoint>,
+    {
+        Ok(UdpSocket(sys::UdpSocket::create(addr)?))
     }
 
-    pub fn recv_from(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr)> {
-        unimplemented!()
+    pub fn recv_from(&mut self, buf: &mut [u8]) -> Result<(usize, IpEndpoint)> {
+        self.0.recv(buf)
     }
 
-    pub fn send_to<A: ToSocketAddrs>(&self, buf: &[u8], addr: A) -> Result<usize> {
-        unimplemented!()
+    pub fn send_to<A>(&mut self, buf: &[u8], addr: A) -> Result<usize>
+    where
+        A: Into<IpEndpoint>,
+    {
+        self.0.send(buf, addr)
+    }
+
+    pub fn join_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result
+    where
+        A: Into<Ipv6Address>,
+    {
+        self.0.join_multicast(multiaddr, interface)
+    }
+
+    pub fn leave_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result
+    where
+        A: Into<Ipv6Address>,
+    {
+        self.0.leave_multicast(multiaddr, interface)
     }
 }
