@@ -1,7 +1,8 @@
-
+use core::fmt;
 use core::ops::Deref;
 use core::ops::DerefMut;
 use core::cell::UnsafeCell;
+use core::marker::PhantomData;
 
 use sys;
 
@@ -26,7 +27,7 @@ pub enum TryLock {
 ///
 /// The data can accessed through this guard via its [Deref] and [DerefMut] implementations.
 ///
-/// This structure is creaty by the [lock] and [try_lock] methods on [Mutex]
+/// This structure is created by the [lock] or [try_lock] methods of a [Mutex].
 ///
 /// [lock]: Mutex::lock
 /// [try_lock]: Mutex::try_lock
@@ -34,6 +35,8 @@ pub enum TryLock {
 /// [DerefMut]: https://doc.rust-lang.org/core/ops/trait.DerefMut.html
 pub struct MutexGuard<'lock, T: ?Sized + 'lock> {
     inner: &'lock Mutex<T>,
+    // The guard is not Send
+    _marker: PhantomData<*mut T>,
 }
 
 impl<T> Mutex<T> {
@@ -46,7 +49,7 @@ impl<T> Mutex<T> {
     }
 }
 
-impl<'a, T: ?Sized> Drop for Mutex<T> {
+impl<T: ?Sized> Drop for Mutex<T> {
     fn drop(&mut self) {
         unsafe {
             self.lock.destroy();
@@ -54,7 +57,7 @@ impl<'a, T: ?Sized> Drop for Mutex<T> {
     }
 }
 
-impl<'a, T: ?Sized> Mutex<T> {
+impl<T: ?Sized> Mutex<T> {
     /// Acquire a mutex, blocking the current thread.
     pub fn lock(&self) -> MutexGuard<T> {
         unsafe {
@@ -81,7 +84,10 @@ unsafe impl<T: ?Sized + Send> Send for Mutex<T> {}
 
 impl<'lock, T: ?Sized> MutexGuard<'lock, T> {
     fn new(mutex: &'lock Mutex<T>) -> Self {
-        MutexGuard { inner: mutex }
+        MutexGuard {
+            inner: mutex,
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -115,5 +121,34 @@ impl<T> From<T> for Mutex<T> {
 impl<T: Default> Default for Mutex<T> {
     fn default() -> Self {
         Mutex::new(Default::default())
+    }
+}
+
+unsafe impl<'lock, T: ?Sized + Sync> Sync for MutexGuard<'lock, T> {}
+
+impl<T: fmt::Debug> fmt::Debug for Mutex<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut builder = f.debug_struct("Mutex");
+
+        match self.try_lock() {
+            Ok(guard) => builder.field("data", &*guard).finish(),
+            Err(_) => {
+
+                struct LockedMutex;
+                impl fmt::Debug for LockedMutex {
+                    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                        write!(f, "<locked>")
+                    }
+                }
+
+                builder.field("data", &LockedMutex).finish()
+            }
+        }
+    }
+}
+
+impl<'lock, T: fmt::Debug> fmt::Debug for MutexGuard<'lock, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("MutexGuard").field("lock", &*self).finish()
     }
 }
