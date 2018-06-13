@@ -10,11 +10,13 @@ embedded_types = "0.3.2"
 
 [dependencies.smoltcp]
 git = "https://github.com/m-labs/smoltcp.git"
+version = "0.4"
 default-features = false
-features = ["proto-ipv6", "proto-ipv4"]
+features = ["proto-ipv4", "proto-ipv6"]
 
 [target.'cfg(target_os="riot")'.dependencies]
-riot-sys = { git = "https://gitlab.cs.hs-rm.de/embedded-util/riot-sys.git", tag = "v0.1.2" }
+#riot-sys = { git = "https://gitlab.cs.hs-rm.de/embedded-util/riot-sys.git", tag = "v0.1.2" }
+riot-sys = { path = "../riot-sys" }
 
 [features]
 default = []
