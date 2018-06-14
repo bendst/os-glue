@@ -131,3 +131,9 @@ impl UdpSocket {
         self.0.leave_multicast(multiaddr, interface)
     }
 }
+
+pub struct EUI64(pub [u8; 8]);
+
+pub fn eui64() -> EUI64 {
+    sys::eui64()
+}

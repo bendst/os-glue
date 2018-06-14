@@ -147,3 +147,22 @@ impl Drop for UdpSocket {
         self.close();
     }
 }
+
+use net;
+
+pub fn eui64() -> net::EUI64 {
+    let mut eui = ffi::eui64_t { uint8: [0; 8] };
+
+    unsafe {
+        let netif = ffi::gnrc_netif_iter(ptr::null_mut());
+        ffi::netdev_eth_get(
+            (*netif).dev,
+            ffi::netopt_t_NETOPT_IPV6_IID,
+            &mut eui as *mut ffi::eui64_t as *mut _,
+            mem::size_of::<ffi::eui64_t>(),
+        );
+    };
+
+    // union access eui is always 64-bit
+    net::EUI64(unsafe { eui.uint64.u8 })
+}
