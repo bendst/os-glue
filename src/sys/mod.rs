@@ -7,6 +7,7 @@ mod std_x86_64 {
     pub use self::std::sync::Mutex;
     pub use self::std::time::Duration;
     pub use self::std::time::Instant;
+    pub use self::std::net::UdpSocket;
 
     use thread;
 
@@ -57,9 +58,9 @@ mod std_x86_64 {
     }
 }
 
-#[cfg(all(not(target_arch = "arm"), feature = "std"))]
+#[cfg(feature = "std")]
 pub use self::std_x86_64::*;
-#[cfg(all(not(target_arch = "arm"), feature = "std"))]
+#[cfg(feature = "std")]
 #[allow(unused_imports)]
 pub(crate) use self::std_x86_64::print;
 

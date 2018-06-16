@@ -2,6 +2,7 @@
 // * RIOT
 use sys;
 pub use sys::Builder;
+pub use sys::Thread;
 
 
 /// An owned permission to join on a thread (block on its termination).
