@@ -150,7 +150,7 @@ impl Drop for UdpSocket {
 
 use net;
 
-pub fn eui64() -> net::EUI64 {
+pub fn eui64() -> net::Eui64 {
     let mut eui = ffi::eui64_t { uint8: [0; 8] };
 
     unsafe {
@@ -164,5 +164,5 @@ pub fn eui64() -> net::EUI64 {
     };
 
     // union access eui is always 64-bit
-    net::EUI64(unsafe { eui.uint64.u8 })
+    net::Eui64(unsafe { eui.uint64.u8 })
 }
