@@ -8,7 +8,7 @@
 #![no_std]
 
 
-#[cfg(target_os="none")]
+#[cfg(target_os = "none")]
 compile_error!(r#"`os_glue` currently has no target os specified. Thats probably an error."#);
 
 extern crate embedded_types;

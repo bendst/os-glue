@@ -65,7 +65,7 @@ pub use self::std_x86_64::*;
 pub(crate) use self::std_x86_64::print;
 
 
-#[cfg(target_os="riot")]
+#[cfg(target_os = "riot")]
 mod riot;
 
 
@@ -83,8 +83,6 @@ pub_use! {
     riot => thread, net, mutex, time
 }
 
-#[cfg(target_os="riot")]
+#[cfg(target_os = "riot")]
 #[allow(unused_imports)]
 pub(crate) use self::riot::io::print;
-
-
