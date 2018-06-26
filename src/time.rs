@@ -4,7 +4,7 @@ use sys;
 
 /// A measurment of a monotonically nondecreasing clock. Opaque and useful only with [Duration].
 ///
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Instant(sys::Instant);
 
 impl Instant {

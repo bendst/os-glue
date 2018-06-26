@@ -31,3 +31,28 @@ impl Instant {
         now.duration_since(*self)
     }
 }
+
+impl PartialEq for Instant {
+    fn eq(&self, other: &Self) -> bool {
+        self.timestamp.seconds == other.timestamp.seconds && self.timestamp.microseconds == other.timestamp.microseconds
+    }
+}
+
+impl Eq for Instant {}
+
+
+use core::cmp::Ordering;
+
+impl Ord for Instant {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let lhs = (self.timestamp.seconds, self.timestamp.microseconds);
+        let rhs = (other.timestamp.seconds, other.timestamp.microseconds);
+        lhs.cmp(&rhs)
+    }
+}
+
+impl PartialOrd for Instant {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
