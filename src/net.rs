@@ -86,6 +86,7 @@ impl Write for IoVec {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum ErrorKind {
     OutOfMemory,
     AddrInUse,
