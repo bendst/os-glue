@@ -1,13 +1,13 @@
-pub use smoltcp::wire::{IpEndpoint, IpAddress, Ipv6Address, Ipv4Address};
+pub use smoltcp::wire::{IpAddress, IpEndpoint, Ipv4Address, Ipv6Address};
 
-use embedded_types::io::Write;
-use embedded_types::io::Read;
 use embedded_types::io;
+use embedded_types::io::Read;
+use embedded_types::io::Write;
 
-use sys;
 use core::mem;
 use core::slice;
 use core::usize;
+use sys;
 
 pub struct RawIoVec {
     ptr: *const u8,
@@ -90,9 +90,16 @@ impl Write for IoVec {
 pub enum ErrorKind {
     OutOfMemory,
     AddrInUse,
+    AddrMissing,
+    BufferToSmall,
     AfNoSupport,
+    NotSupported,
     InvalidInput,
+    Protocol,
     WouldBlock,
+    Timeout,
+    HostUnreachable,
+    NoMatchingInterface,
 }
 
 pub struct UdpSocket(sys::UdpSocket);

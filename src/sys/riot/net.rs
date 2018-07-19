@@ -1,8 +1,7 @@
-use riot_sys::ffi;
 use core::mem;
 use core::ptr;
-use net::{ErrorKind, IpEndpoint, Ipv6Address, Ipv4Address, IpAddress};
-
+use net::{ErrorKind, IpAddress, IpEndpoint, Ipv4Address, Ipv6Address};
+use riot_sys::ffi;
 
 pub struct UdpSocket {
     inner: ffi::sock_udp_t,
@@ -18,21 +17,19 @@ impl UdpSocket {
         let remote = ptr::null_mut();
 
         let local = local.into();
+        let local = UdpSocket::udp_endpoint(&local);
 
-        let mut ipv6_local = ffi::SOCK_IPV6_EP_ANY;
-
-        // union access is unsafe
-        unsafe { ipv6_local.addr.ipv6.copy_from_slice(local.addr.as_bytes()) };
-        ipv6_local.port = local.port;
-
-        let error = unsafe { ffi::sock_udp_create(&mut sock_udp, &ipv6_local, remote, 0) };
+        let error = unsafe { ffi::sock_udp_create(&mut sock_udp, &local, remote, 0) };
 
         match error {
+            error if error == -(ffi::EADDRINUSE as i32) => Err(ErrorKind::AddrInUse),
+            error if error == -(ffi::EAFNOSUPPORT as i32) => Err(ErrorKind::AfNoSupport),
+            error if error == -(ffi::EINVAL as i32) => Err(ErrorKind::InvalidInput),
             0 => {
                 let inner = sock_udp;
                 Ok(UdpSocket { inner })
             }
-            _ => Err(ErrorKind::InvalidInput),
+            _ => unreachable!("Unknown error occured. RIOT API changed."),
         }
     }
 
@@ -49,7 +46,6 @@ impl UdpSocket {
             )
         };
 
-
         // union access is unsafe
         let addr = match remote.family as _ {
             ffi::AF_INET6 => {
@@ -60,14 +56,49 @@ impl UdpSocket {
                 let ipv4 = unsafe { remote.addr.ipv4 };
                 Ipv4Address::from_bytes(&ipv4).into()
             }
-            _ => panic!(),
+            _ => panic!("Unknown af family"),
         };
 
         let endpoint = IpEndpoint::new(addr, remote.port);
 
         match error {
-            size if size < 0 => unimplemented!(),
-            size => Ok((size as _, endpoint)),
+            error if error == -(ffi::EADDRNOTAVAIL as isize) => Err(ErrorKind::AddrMissing),
+            error if error == -(ffi::EAGAIN as isize) => Err(ErrorKind::WouldBlock),
+            error if error == -(ffi::EINVAL as isize) => Err(ErrorKind::InvalidInput),
+            error if error == -(ffi::ENOBUFS as isize) => Err(ErrorKind::BufferToSmall),
+            error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory),
+            error if error == -(ffi::EPROTO as isize) => Err(ErrorKind::Protocol),
+            error if error == -(ffi::ETIMEDOUT as isize) => Err(ErrorKind::Timeout),
+            size if size >= 0 => Ok((size as _, endpoint)),
+            _ => unreachable!("Unknown error occured. RIOT API changed."),
+        }
+    }
+
+    /// Nice little wrapper for creating udp endpoint for RIOT.
+    fn udp_endpoint(endpoint: &IpEndpoint) -> ffi::sock_udp_ep_t {
+        let is_ipv6 = match endpoint.addr {
+            IpAddress::Ipv4(..) => false,
+            IpAddress::Ipv6(..) => true,
+            _ => panic!("Unknown address format"),
+        };
+
+        let family = if is_ipv6 { ffi::AF_INET6 } else { ffi::AF_INET } as _;
+
+        ffi::sock_udp_ep_t {
+            family,
+            netif: ffi::SOCK_ADDR_ANY_NETIF as _,
+            port: endpoint.port,
+            addr: {
+                if is_ipv6 {
+                    let mut ipv6 = [0; 16];
+                    ipv6.copy_from_slice(endpoint.addr.as_bytes());
+                    ffi::_sock_tl_ep__bindgen_ty_1 { ipv6 }
+                } else {
+                    let mut ipv4 = [0; 4];
+                    ipv4.copy_from_slice(endpoint.addr.as_bytes());
+                    ffi::_sock_tl_ep__bindgen_ty_1 { ipv4 }
+                }
+            },
         }
     }
 
@@ -76,29 +107,8 @@ impl UdpSocket {
     where
         A: Into<IpEndpoint>,
     {
-        let endpoint: IpEndpoint = addr.into();
-
-        let is_ipv6 = match endpoint.addr {
-            IpAddress::Ipv4(..) => false,
-            IpAddress::Ipv6(..) => true,
-            _ => panic!(),
-        };
-
-        let family = if is_ipv6 { ffi::AF_INET6 } else { ffi::AF_INET } as _;
-
-        let mut remote: ffi::sock_udp_ep_t = unsafe { mem::zeroed() };
-        remote.family = family;
-        remote.port = endpoint.port;
-
-        // union access is unsafe
-        if is_ipv6 {
-            unsafe { remote.addr.ipv6.copy_from_slice(endpoint.addr.as_bytes()) };
-        } else {
-            unsafe { remote.addr.ipv4.copy_from_slice(endpoint.addr.as_bytes()) };
-        };
-
-        // TODO network interface selection?
-        remote.netif = ffi::SOCK_ADDR_ANY_NETIF as _;
+        let endpoint = addr.into();
+        let remote = UdpSocket::udp_endpoint(&endpoint);
 
         let error = unsafe {
             ffi::sock_udp_send(
@@ -110,8 +120,14 @@ impl UdpSocket {
         };
 
         match error {
-            error if error < 0 => unimplemented!(),
-            size => Ok(size as _),
+            error if error == -(ffi::EADDRINUSE as isize) => Err(ErrorKind::AddrInUse),
+            error if error == -(ffi::EAFNOSUPPORT as isize) => Err(ErrorKind::AfNoSupport),
+            error if error == -(ffi::EHOSTUNREACH as isize) => Err(ErrorKind::HostUnreachable),
+            error if error == -(ffi::EINVAL as isize) => Err(ErrorKind::InvalidInput),
+            error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory),
+            error if error == -(ffi::ENOTCONN as isize) => unreachable!("NULL cannot be passed"),
+            size if size >= 0 => Ok(size as _),
+            _ => unreachable!("Unknown error occurred. RIOT API changed."),
         }
     }
 
@@ -125,10 +141,22 @@ impl UdpSocket {
     where
         A: Into<Ipv6Address>,
     {
-        use core::ptr;
+        let interface = find_interface(interface).ok_or(ErrorKind::NoMatchingInterface)?;
+
         let multiaddr = multiaddr.into();
-        let error = unsafe { ffi::gnrc_netif_ipv6_group_join(ptr::null(), ptr::null_mut()) };
-        unimplemented!()
+        let mut addr_buffer = [0; 16];
+        addr_buffer.copy_from_slice(multiaddr.as_bytes());
+
+        let mut multiaddr = ffi::ipv6_addr_t { u8: addr_buffer };
+
+        let error = unsafe { ffi::gnrc_netif_ipv6_group_join(interface, &mut multiaddr) };
+
+        match error {
+            error if error == -(ffi::ENOMEM as i32) => Err(ErrorKind::OutOfMemory),
+            error if error == -(ffi::ENOTSUP as i32) => Err(ErrorKind::NotSupported),
+            size if size == mem::size_of::<ffi::ipv6_addr_t>() as _ => Ok(()),
+            _ => unreachable!("Unknown error occurred. RIOT API changed"),
+        }
     }
 
     #[inline]
@@ -136,10 +164,33 @@ impl UdpSocket {
     where
         A: Into<Ipv6Address>,
     {
+        let interface = find_interface(interface).ok_or(ErrorKind::NoMatchingInterface)?;
+
         let multiaddr = multiaddr.into();
-        let error = unsafe { ffi::gnrc_netif_ipv6_group_leave(ptr::null(), ptr::null_mut()) };
-        unimplemented!();
+        let mut addr_buffer = [0; 16];
+        addr_buffer.copy_from_slice(multiaddr.as_bytes());
+
+        let mut multiaddr = ffi::ipv6_addr_t { u8: addr_buffer };
+        let error = unsafe { ffi::gnrc_netif_ipv6_group_leave(interface, &mut multiaddr) };
+
+        match error {
+            error if error == -(ffi::ENOTSUP as i32) => Err(ErrorKind::NotSupported),
+            size if size == mem::size_of::<ffi::ipv6_addr_t>() as _ => Ok(()),
+            _ => unreachable!("Unknown error occured. RIOT API changed"),
+        }
     }
+}
+
+fn find_interface(mut index: u32) -> Option<*mut ffi::gnrc_netif_t> {
+    let mut next = ptr::null();
+    while let Some(interface) = unsafe { ffi::gnrc_netif_iter(next) }.into() {
+        if index == 0 {
+            return Some(interface);
+        }
+        next = interface;
+        index -= 1;
+    }
+    None
 }
 
 impl Drop for UdpSocket {
