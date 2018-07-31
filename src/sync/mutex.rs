@@ -1,14 +1,16 @@
+use core::cell::UnsafeCell;
 use core::fmt;
+use core::marker::PhantomData;
 use core::ops::Deref;
 use core::ops::DerefMut;
-use core::cell::UnsafeCell;
-use core::marker::PhantomData;
 
 use sys;
 
 /// Mutual exclusion primitive.
 pub struct Mutex<T: ?Sized> {
-    // TODO check whether the Mutex should be allocated on the heap or can be safely inlined.
+    // FIXME: check whether the Mutex should be allocated on the heap or can be safely inlined.
+    // Heap allocation would provide a constant address in the case thats relevant.
+    // It could introduce subtle bugs.
     lock: sys::Mutex,
     data: UnsafeCell<T>,
 }
@@ -133,7 +135,6 @@ impl<T: fmt::Debug> fmt::Debug for Mutex<T> {
         match self.try_lock() {
             Ok(guard) => builder.field("data", &*guard).finish(),
             Err(_) => {
-
                 struct LockedMutex;
                 impl fmt::Debug for LockedMutex {
                     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

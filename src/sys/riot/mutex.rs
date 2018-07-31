@@ -1,22 +1,27 @@
-
 use riot_sys::ffi;
 
-use core::ptr;
 use core::cell::UnsafeCell;
+use core::ptr;
 
 pub struct Mutex(UnsafeCell<ffi::mutex_t>);
+
+unsafe impl Sync for Mutex {}
+unsafe impl Send for Mutex {}
 
 impl Mutex {
     pub const unsafe fn new() -> Self {
         Mutex(UnsafeCell::new(ffi::mutex_t {
-            queue: ffi::list_node { next: ptr::null_mut() },
+            queue: ffi::list_node {
+                next: ptr::null_mut(),
+            },
         }))
     }
 
     #[allow(unused)]
     #[inline]
-    pub unsafe fn init(&mut self) {
-        ffi::mutex_init(self.0.get())
+    pub unsafe fn init(&self) {
+        //ffi::mutex_init(self.0.get())
+        unimplemented!("No special initialization needed")
     }
 
     #[inline]
@@ -40,5 +45,7 @@ impl Mutex {
     }
 
     #[inline]
-    pub unsafe fn destroy(&self) {}
+    pub unsafe fn destroy(&self) {
+        unimplemented!("RIOT has no destroy function.")
+    }
 }

@@ -1,7 +1,7 @@
 fn update_readme() {
-    use std::process::Command;
     use std::fs::File;
     use std::io::Write;
+    use std::process::Command;
 
     let output = Command::new("cargo").arg("readme").output().unwrap();
 
@@ -9,7 +9,9 @@ fn update_readme() {
 
     File::create("README.md")
         .as_mut()
-        .map(|file| { file.write(readme.as_bytes()).unwrap(); })
+        .map(|file| {
+            file.write(readme.as_bytes()).unwrap();
+        })
         .unwrap();
 }
 

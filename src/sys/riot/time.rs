@@ -34,12 +34,12 @@ impl Instant {
 
 impl PartialEq for Instant {
     fn eq(&self, other: &Self) -> bool {
-        self.timestamp.seconds == other.timestamp.seconds && self.timestamp.microseconds == other.timestamp.microseconds
+        self.timestamp.seconds == other.timestamp.seconds
+            && self.timestamp.microseconds == other.timestamp.microseconds
     }
 }
 
 impl Eq for Instant {}
-
 
 use core::cmp::Ordering;
 

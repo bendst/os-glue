@@ -1,7 +1,10 @@
+#[doc(hidden)]
+pub use sys::_print;
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {
-        $crate::sys::print(format_args!($($arg)*))
+        $crate::io::_print(format_args!($($arg)*))
     }
 }
 
@@ -14,6 +17,8 @@ macro_rules! println {
         print!(concat!($fmt, "\n"))
     };
     ($fmt: expr, $($arg:tt)*) => {
-        print!(concat!($fmt, "\n"), $($arg)*); 
+        print!(concat!($fmt, "\n"), $($arg)*);
     }
 }
+
+pub use sys::Error;

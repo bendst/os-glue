@@ -1,7 +1,7 @@
 use core::fmt;
 use core::fmt::Write;
-use sync::Mutex;
 use riot_sys::ffi;
+use sync::Mutex;
 
 struct Writer;
 struct SyncWriter(Mutex<Writer>);
@@ -19,7 +19,24 @@ impl fmt::Write for Writer {
 }
 
 #[inline(always)]
-pub(crate) fn print(args: fmt::Arguments) {
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
     let mut writer = WRITER.0.lock();
     writer.write_fmt(args).unwrap()
+}
+
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+pub enum Error {
+    OutOfMemory,
+    AddrInUse,
+    AddrMissing,
+    BufferToSmall,
+    AfNoSupport,
+    NotSupported,
+    InvalidInput,
+    Protocol,
+    WouldBlock,
+    Timeout,
+    HostUnreachable,
+    NoMatchingInterface,
 }

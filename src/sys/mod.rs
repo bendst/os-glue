@@ -1,13 +1,15 @@
-
 #[cfg(all(not(target_arch = "arm"), feature = "std"))]
 mod std_x86_64 {
+    use net;
     extern crate std;
-    pub use self::std::thread::{Builder, yield_now, sleep, park_timeout, park, panicking, current,
-                                Thread, JoinHandle};
+    pub use self::std::io::Error;
+    pub use self::std::net::{Ipv6Addr as Ipv6Address, SocketAddr, UdpSocket, IpAddr as IpAddress, Ipv4Addr as Ipv4Address};
     pub use self::std::sync::Mutex;
+    pub use self::std::thread::{
+        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
+    };
     pub use self::std::time::Duration;
     pub use self::std::time::Instant;
-    pub use self::std::net::UdpSocket;
 
     use thread;
 
@@ -47,42 +49,63 @@ mod std_x86_64 {
     use self::std::fmt;
 
     #[allow(dead_code)]
-    pub(crate) fn print(args: fmt::Arguments) {
-        use self::std::io::Write;
+    #[doc(hidden)]
+    pub fn _print(args: fmt::Arguments) {
         use self::std::io;
+        use self::std::io::Write;
 
         let stdout = io::stdout();
         let mut guard = stdout.lock();
 
         guard.write_fmt(args).unwrap()
     }
+
+    pub fn eui64() -> net::Eui64 {
+        use mac_address::get_mac_address;
+
+        let mac = get_mac_address()
+            .expect("Unable to fetch MAC address.")
+            .expect("No mac address found");
+
+        let mac_bytes = mac.bytes();
+
+        let mut eui64 = [0xFF; 8];
+
+        // Split the MAC address
+        eui64[..3].copy_from_slice(&mac_bytes[..3]);
+        eui64[5..].copy_from_slice(&mac_bytes[3..]);
+
+        // invert the universal/local (U/L) flag (bit 7) in the OUI portion of the address
+        eui64[0] ^= 0x02;
+
+        net::Eui64(eui64)
+    }
 }
 
 #[cfg(feature = "std")]
-pub use self::std_x86_64::*;
-#[cfg(feature = "std")]
 #[allow(unused_imports)]
-pub(crate) use self::std_x86_64::print;
-
+pub use self::std_x86_64::_print;
+#[cfg(feature = "std")]
+pub use self::std_x86_64::*;
 
 #[cfg(target_os = "riot")]
 mod riot;
-
 
 macro_rules! pub_use {
     ($meta: meta, $os: ident => $( $item: ident ),*) => {
         $(
             #[cfg($meta)]
             pub use self::$os::$item::*;
-        )* 
+        )*
     };
 }
 
 pub_use! {
     target_os = "riot",
-    riot => thread, net, mutex, time
+    riot => thread, net, mutex, time, io
 }
 
 #[cfg(target_os = "riot")]
 #[allow(unused_imports)]
-pub(crate) use self::riot::io::print;
+#[doc(hidden)]
+pub use self::riot::io::_print;

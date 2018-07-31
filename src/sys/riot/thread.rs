@@ -1,8 +1,8 @@
-pub use core::time::Duration;
-use core::marker::PhantomData;
-use alloc::boxed::FnBox;
 use alloc::boxed::Box;
+use alloc::boxed::FnBox;
 use alloc::vec::Vec;
+use core::marker::PhantomData;
+pub use core::time::Duration;
 
 use core::ptr;
 
@@ -51,7 +51,6 @@ impl Thread {
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct ThreadId(ffi::kernel_pid_t);
 
-
 #[inline]
 pub fn current() -> Thread {
     // RIOT does it the same way with an inlined function.
@@ -80,7 +79,6 @@ pub fn park_timeout(_duration: Duration) {
     unimplemented!("RIOT does not support timeouts")
 }
 
-
 #[inline]
 unsafe fn spawn_inner<'a>(
     f: Box<FnBox() -> () + Send + 'a>,
@@ -89,7 +87,6 @@ unsafe fn spawn_inner<'a>(
     flags: i32,
     priority: u32,
 ) -> Result<JoinHandle<()>, thread::SpawnError> {
-
     // Directly allocate our 'heap'
     let f = box f;
 
@@ -133,7 +130,6 @@ where
     B::new().spawn(f).expect("thread spawn failed")
 }
 
-
 #[inline]
 pub fn yield_now() {
     unsafe { ffi::thread_yield() }
@@ -147,15 +143,16 @@ pub struct Builder {
     flags: Option<i32>,
 }
 
-use thread::BuilderExt;
 use thread;
-
+use thread::BuilderExt;
 
 impl BuilderExt for Builder {
     type JoinHandle = thread::JoinHandle;
     #[inline]
     fn new() -> Self {
-        Builder { ..Default::default() }
+        Builder {
+            ..Default::default()
+        }
     }
 
     #[inline]
