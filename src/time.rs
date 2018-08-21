@@ -1,7 +1,7 @@
 pub use core::time::Duration;
 
 use sys;
-use core::ops::Sub;
+use core::ops::{Add, Sub};
 
 /// A measurment of a monotonically nondecreasing clock. Opaque and useful only with [Duration].
 ///
@@ -48,5 +48,19 @@ impl Sub<Instant> for Instant {
     type Output = Duration;
     fn sub(self, other: Instant) -> Self::Output {
         self.duration_since(other)
+    }
+}
+
+impl Sub<Duration> for Instant {
+    type Output = Instant;
+    fn sub(self, other: Duration) -> Self::Output {
+        Instant(self.0 - other)
+    }
+}
+
+impl Add<Duration> for Instant {
+    type Output = Instant;
+    fn add(self, other: Duration) -> Self::Output {
+        Instant(self.0 + other)
     }
 }

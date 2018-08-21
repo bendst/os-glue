@@ -7,7 +7,7 @@ mod std_x86_64 {
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
     };
-    pub use self::std::sync::Mutex;
+    pub use self::std::sync::{Mutex, MutexGuard};
     pub use self::std::thread::{
         current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
     };

@@ -9,3 +9,6 @@ pub use self::mutex::*;
 // Implement a alternative Mutex via spinlocks,
 // because the std lib does not provide a mutex which
 // can be initialized const.
+
+#[cfg(all(not(target_arch = "arm"), feature = "std"))]
+pub use sys::{Mutex, MutexGuard};

@@ -1,6 +1,8 @@
 use riot_sys::ffi;
 use time::Duration;
 
+use core::ops::{Add, Sub};
+
 #[derive(Debug, Copy, Clone)]
 pub struct Instant {
     timestamp: ffi::timex_t,
@@ -29,6 +31,24 @@ impl Instant {
     pub fn elapsed(&self) -> Duration {
         let now = Instant::now();
         now.duration_since(*self)
+    }
+
+    pub fn add_duration(self, duration: Duration) -> Instant {
+        let timestamp = unsafe {
+            let timex_timestamp = ffi::timex_set(duration.as_secs() as _, duration.subsec_micros());
+            ffi::timex_add(self.timestamp, timex_timestamp)
+        };
+
+        Instant { timestamp }
+    }
+
+    pub fn sub_duration(self, duration: Duration) -> Instant {
+        let timestamp = unsafe {
+            let timex_timestamp = ffi::timex_set(duration.as_secs() as _, duration.subsec_micros());
+            ffi::timex_sub(self.timestamp, timex_timestamp)
+        };
+
+        Instant { timestamp }
     }
 }
 
@@ -66,3 +86,16 @@ impl From<(i32, u32)> for Instant {
     }
 }
 
+impl Add<Duration> for Instant {
+    type Output = Instant;
+    fn add(self, other: Duration) -> Self::Output {
+        self.add_duration(other)
+    }
+}
+
+impl Sub<Duration> for Instant {
+    type Output = Instant;
+    fn sub(self, other: Duration) -> Self::Output {
+        self.sub_duration(other)
+    }
+}

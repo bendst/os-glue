@@ -44,5 +44,7 @@ pub mod time;
 
 pub mod net;
 
+pub mod error;
+
 #[macro_use]
 pub mod io;
