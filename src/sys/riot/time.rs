@@ -20,7 +20,7 @@ impl Instant {
     #[inline]
     pub fn duration_since(&self, earlier: Instant) -> Duration {
         let duration = unsafe { ffi::timex_sub(self.timestamp, earlier.timestamp) };
-        // prevent overflowing by saturating
+        // TODO: check overflowing behaviour
         let nanos = duration.microseconds.saturating_mul(1000);
         Duration::new(duration.seconds.into(), nanos)
     }
@@ -56,3 +56,13 @@ impl PartialOrd for Instant {
         Some(self.cmp(other))
     }
 }
+
+impl From<(i32, u32)> for Instant {
+    fn from((sec, nanosec): (i32, u32)) -> Self {
+        // TODO: check overflowing behaviour
+        let microsec = nanosec.saturating_mul(1000);
+        let timestamp = unsafe { ffi::timex_set(sec as _, microsec) };
+        Instant { timestamp }
+    }
+}
+

@@ -9,7 +9,6 @@ struct SyncWriter(Mutex<Writer>);
 static WRITER: SyncWriter = SyncWriter(Mutex::new(Writer));
 
 impl fmt::Write for Writer {
-    #[inline(always)]
     fn write_str(&mut self, s: &str) -> fmt::Result {
         unsafe {
             ffi::print(s.as_ptr(), s.len());

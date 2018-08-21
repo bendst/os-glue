@@ -3,7 +3,10 @@ mod std_x86_64 {
     use net;
     extern crate std;
     pub use self::std::io::Error;
-    pub use self::std::net::{Ipv6Addr as Ipv6Address, SocketAddr, UdpSocket, IpAddr as IpAddress, Ipv4Addr as Ipv4Address};
+    pub use self::std::net::{
+        IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
+        UdpSocket,
+    };
     pub use self::std::sync::Mutex;
     pub use self::std::thread::{
         current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,

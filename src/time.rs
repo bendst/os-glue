@@ -1,6 +1,7 @@
 pub use core::time::Duration;
 
 use sys;
+use core::ops::Sub;
 
 /// A measurment of a monotonically nondecreasing clock. Opaque and useful only with [Duration].
 ///
@@ -31,5 +32,21 @@ impl Instant {
     /// Returns the amount of time elasped since this instant was created.
     pub fn elapsed(&self) -> Duration {
         self.0.elapsed()
+    }
+}
+
+impl<T> From<T> for Instant
+where
+    T: Into<sys::Instant>,
+{
+    fn from(t: T) -> Self {
+        Instant(t.into())
+    }
+}
+
+impl Sub<Instant> for Instant {
+    type Output = Duration;
+    fn sub(self, other: Instant) -> Self::Output {
+        self.duration_since(other)
     }
 }
