@@ -14,6 +14,7 @@ mod std_x86_64 {
     pub use self::std::time::Duration;
     use time2;
     use thread;
+    use self::std::ops::Sub;
 
     impl thread::BuilderExt for Builder {
         type JoinHandle = thread::JoinHandle;
@@ -83,7 +84,7 @@ mod std_x86_64 {
         net::Eui64(eui64)
     }
 
-    #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
+    #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
     pub struct Instant {
         timespec: time2::Timespec,
     }
@@ -114,6 +115,14 @@ mod std_x86_64 {
             Instant { timespec: time2::Timespec::new(sec as _, nsec as _) }
         }
     }
+
+    impl Sub<Duration> for Instant {
+        type Output = Instant;
+        fn sub(self, other: Duration) -> Self::Output {
+            Instant {timespec: self.timespec - other }
+        }
+    }
+
 }
 
 #[cfg(feature = "std")]
