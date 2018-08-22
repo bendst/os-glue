@@ -12,8 +12,7 @@ mod std_x86_64 {
         current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
     };
     pub use self::std::time::Duration;
-    pub use self::std::time::Instant;
-
+    use time2;
     use thread;
 
     impl thread::BuilderExt for Builder {
@@ -82,6 +81,38 @@ mod std_x86_64 {
         eui64[0] ^= 0x02;
 
         net::Eui64(eui64)
+    }
+
+    #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
+    pub struct Instant {
+        timespec: time2::Timespec,
+    }
+
+    impl Instant {
+        #[inline]
+        pub fn now() -> Self {
+            let tm = time2::now();
+            let timespec = tm.to_timespec();
+            Instant { timespec }
+        }
+
+        #[inline]
+        pub fn duration_since(&self, earlier: Instant) -> Duration {
+            let duration = self.timespec - earlier.timespec;
+            duration.to_std().unwrap()
+        }
+
+        #[inline]
+        pub fn elapsed(&self) -> Duration {
+            let now = Instant::now();
+            now.duration_since(*self)
+        }
+    }
+
+    impl From<(i32, u32)> for Instant {
+        fn from((sec, nsec): (i32, u32)) -> Self {
+            Instant { timespec: time2::Timespec::new(sec as _, nsec as _) }
+        }
     }
 }
 

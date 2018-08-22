@@ -1,3 +1,4 @@
+
 [package]
 name = "os-glue"
 version = "0.0.0"
@@ -8,6 +9,8 @@ build = "build.rs"
 [dependencies]
 embedded_types = "0.3.2"
 mac_address = {version = "0.8.0", default-features = false, optional = true}
+spin = {version = "0.4.9", optional = true}
+time = {version = "0.1.4", optional = true }
 
 [dependencies.smoltcp]
 git = "https://github.com/m-labs/smoltcp.git"
@@ -21,6 +24,6 @@ riot-sys = { git = "https://gitlab.cs.hs-rm.de/embedded-util/riot-sys.git", tag 
 
 [features]
 default = []
-std = ["mac"]
-mac = ["mac_address"]
+std = ["mac_address", "spin", "time"]
+
 samr21-xpro = ["riot-sys/samr21-xpro"]

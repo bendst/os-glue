@@ -12,10 +12,21 @@ compile_error!(r#"`os_glue` currently has no target os specified. Thats probably
 
 extern crate alloc;
 extern crate embedded_types;
-#[cfg(any(target_os = "windows", target_os = "linux"))]
+
+
+#[cfg(feature="std")]
 extern crate mac_address;
+
+#[cfg(feature="std")]
+extern crate time as time2;
+
+#[cfg(feature="std")]
+extern crate spin;
+
+
 #[cfg(target_os = "riot")]
 extern crate riot_sys;
+
 extern crate smoltcp;
 
 /// Re-export of the underlying bindings.
