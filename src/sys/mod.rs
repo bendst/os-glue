@@ -1,20 +1,19 @@
-#[cfg(all(not(target_arch = "arm"), feature = "std"))]
+#[cfg(feature = "std")]
 mod std_x86_64 {
-    use net;
-    extern crate std;
-    pub use self::std::io::Error;
-    pub use self::std::net::{
+    use crate::net;
+
+    use std::ops::{Add, Sub};
+    pub use std::thread::{
+        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
+    };
+    pub use std::time::Duration;
+    pub use std::io::Error;
+    pub use std::net::{
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
     };
-    pub use self::std::sync::{Mutex, MutexGuard};
-    pub use self::std::thread::{
-        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
-    };
-    pub use self::std::time::Duration;
-    use time2;
-    use thread;
-    use self::std::ops::Sub;
+
+    use crate::thread;
 
     impl thread::BuilderExt for Builder {
         type JoinHandle = thread::JoinHandle;
@@ -29,6 +28,7 @@ mod std_x86_64 {
         fn stack_size(self, stack_size: i32) -> Self {
             Builder::stack_size(self, stack_size as _)
         }
+
         fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, thread::SpawnError>
         where
             F: FnOnce() -> (),
@@ -49,13 +49,13 @@ mod std_x86_64 {
         B::new().spawn(f).expect("thread spawn failed")
     }
 
-    use self::std::fmt;
+    use std::fmt;
 
     #[allow(dead_code)]
     #[doc(hidden)]
     pub fn _print(args: fmt::Arguments) {
-        use self::std::io;
-        use self::std::io::Write;
+        use std::io;
+        use std::io::Write;
 
         let stdout = io::stdout();
         let mut guard = stdout.lock();
@@ -86,13 +86,13 @@ mod std_x86_64 {
 
     #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Debug)]
     pub struct Instant {
-        timespec: time2::Timespec,
+        timespec: time::Timespec,
     }
 
     impl Instant {
         #[inline]
         pub fn now() -> Self {
-            let tm = time2::now();
+            let tm =  time::now();
             let timespec = tm.to_timespec();
             Instant { timespec }
         }
@@ -112,17 +112,29 @@ mod std_x86_64 {
 
     impl From<(i32, u32)> for Instant {
         fn from((sec, nsec): (i32, u32)) -> Self {
-            Instant { timespec: time2::Timespec::new(sec as _, nsec as _) }
+            Instant {
+                timespec:  time::Timespec::new(sec as _, nsec as _),
+            }
         }
     }
 
-    impl Sub<Duration> for Instant {
+    impl Sub<crate::time::Duration> for Instant {
         type Output = Instant;
         fn sub(self, other: Duration) -> Self::Output {
-            Instant {timespec: self.timespec - other }
+            Instant {
+                timespec: self.timespec -  time::Duration::from_std(other).unwrap(),
+            }
         }
     }
 
+    impl Add<crate::time::Duration> for Instant {
+        type Output = Instant;
+        fn add(self, other: Duration) -> Self::Output {
+            Instant {
+                timespec: self.timespec +  time::Duration::from_std(other).unwrap(),
+            }
+        }
+    }
 }
 
 #[cfg(feature = "std")]

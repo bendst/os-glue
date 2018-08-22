@@ -1,5 +1,5 @@
 #[doc(hidden)]
-pub use sys::_print;
+pub use crate::sys::_print;
 
 #[macro_export]
 macro_rules! print {
@@ -21,4 +21,4 @@ macro_rules! println {
     }
 }
 
-pub use sys::Error;
+pub use crate::sys::Error;

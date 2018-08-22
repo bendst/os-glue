@@ -1,7 +1,7 @@
-use io;
-use sys;
+use crate::io;
+use crate::sys;
 
-pub use sys::{IpAddress, Ipv4Address, Ipv6Address, SocketAddr};
+pub use crate::sys::{IpAddress, Ipv4Address, Ipv6Address, SocketAddr};
 
 pub struct UdpSocket(sys::UdpSocket);
 
@@ -40,6 +40,7 @@ impl UdpSocket {
         self.0.leave_multicast_v6(&multiaddr.into(), interface)
     }
 }
+
 
 pub struct Eui64(pub [u8; 8]);
 

@@ -1,8 +1,9 @@
 // Configure the module which shall be use
 // * RIOT
-use sys;
-pub use sys::Builder;
-pub use sys::Thread;
+use crate::sys;
+pub use crate::sys::Builder;
+pub use crate::sys::Thread;
+use crate::time;
 
 /// An owned permission to join on a thread (block on its termination).
 pub struct JoinHandle(sys::JoinHandle<()>);
@@ -56,12 +57,12 @@ pub fn park() {
 
 /// Blocks unless or until the current thread's token is made available or
 /// the specified duration has been reached (may wake spuriously).
-pub fn park_timeout(duration: sys::Duration) {
+pub fn park_timeout(duration: time::Duration) {
     sys::park_timeout(duration)
 }
 
 /// Puts the current thread to sleep for the specified amount of time.
-pub fn sleep(duration: sys::Duration) {
+pub fn sleep(duration: time::Duration) {
     sys::sleep(duration)
 }
 

@@ -1,7 +1,7 @@
 pub use core::time::Duration;
 
-use sys;
 use core::ops::{Add, Sub};
+use crate::sys;
 
 /// A measurment of a monotonically nondecreasing clock. Opaque and useful only with [Duration].
 ///
