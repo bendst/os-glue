@@ -2,16 +2,16 @@
 mod std_x86_64 {
     use crate::net;
 
-    use std::ops::{Add, Sub};
-    pub use std::thread::{
-        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
-    };
-    pub use std::time::Duration;
     pub use std::io::Error;
     pub use std::net::{
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
     };
+    use std::ops::{Add, Sub};
+    pub use std::thread::{
+        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
+    };
+    pub use std::time::Duration;
 
     use crate::thread;
 
@@ -92,7 +92,7 @@ mod std_x86_64 {
     impl Instant {
         #[inline]
         pub fn now() -> Self {
-            let tm =  time::now();
+            let tm = time::now();
             let timespec = tm.to_timespec();
             Instant { timespec }
         }
@@ -113,7 +113,7 @@ mod std_x86_64 {
     impl From<(i32, u32)> for Instant {
         fn from((sec, nsec): (i32, u32)) -> Self {
             Instant {
-                timespec:  time::Timespec::new(sec as _, nsec as _),
+                timespec: time::Timespec::new(sec as _, nsec as _),
             }
         }
     }
@@ -122,7 +122,7 @@ mod std_x86_64 {
         type Output = Instant;
         fn sub(self, other: Duration) -> Self::Output {
             Instant {
-                timespec: self.timespec -  time::Duration::from_std(other).unwrap(),
+                timespec: self.timespec - time::Duration::from_std(other).unwrap(),
             }
         }
     }
@@ -131,7 +131,7 @@ mod std_x86_64 {
         type Output = Instant;
         fn add(self, other: Duration) -> Self::Output {
             Instant {
-                timespec: self.timespec +  time::Duration::from_std(other).unwrap(),
+                timespec: self.timespec + time::Duration::from_std(other).unwrap(),
             }
         }
     }

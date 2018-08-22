@@ -1,6 +1,7 @@
 use core::mem;
 use core::ptr;
-use io::{self, Error};
+use crate::io::{self, Error};
+use crate::net;
 use riot_sys::ffi;
 
 pub use smoltcp::wire::{IpAddress, IpEndpoint as SocketAddr, Ipv4Address, Ipv6Address};
@@ -194,8 +195,6 @@ impl Drop for UdpSocket {
         self.close();
     }
 }
-
-use net;
 
 pub fn eui64() -> net::Eui64 {
     let mut eui = ffi::eui64_t { uint8: [0; 8] };

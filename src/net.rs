@@ -41,7 +41,6 @@ impl UdpSocket {
     }
 }
 
-
 pub struct Eui64(pub [u8; 8]);
 
 pub fn eui64() -> Eui64 {

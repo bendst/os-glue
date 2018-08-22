@@ -4,7 +4,7 @@ use core::marker::PhantomData;
 use core::ops::Deref;
 use core::ops::DerefMut;
 
-use sys;
+use crate::sys;
 
 /// Mutual exclusion primitive.
 pub struct Mutex<T: ?Sized> {

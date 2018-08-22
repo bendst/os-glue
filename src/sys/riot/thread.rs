@@ -2,9 +2,10 @@ use alloc::boxed::Box;
 use alloc::boxed::FnBox;
 use alloc::vec::Vec;
 use core::marker::PhantomData;
-pub use core::time::Duration;
-
 use core::ptr;
+pub use core::time::Duration;
+use crate::thread;
+use crate::thread::BuilderExt;
 
 use riot_sys::ffi;
 
@@ -142,9 +143,6 @@ pub struct Builder {
     priority: Option<u32>,
     flags: Option<i32>,
 }
-
-use thread;
-use thread::BuilderExt;
 
 impl BuilderExt for Builder {
     type JoinHandle = thread::JoinHandle;

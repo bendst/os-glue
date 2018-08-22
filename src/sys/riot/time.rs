@@ -1,5 +1,5 @@
+use crate::time::Duration;
 use riot_sys::ffi;
-use time::Duration;
 
 use core::ops::{Add, Sub};
 

@@ -1,7 +1,7 @@
 use core::fmt;
 use core::fmt::Write;
+use crate::sync::Mutex;
 use riot_sys::ffi;
-use sync::Mutex;
 
 struct Writer;
 struct SyncWriter(Mutex<Writer>);
