@@ -24,8 +24,13 @@ pub fn _print(args: fmt::Arguments) {
     writer.write_fmt(args).unwrap()
 }
 
+#[derive(Debug)]
+pub struct Error {
+    kind: ErrorKind,
+}
+
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub enum Error {
+pub enum ErrorKind {
     OutOfMemory,
     AddrInUse,
     AddrMissing,
@@ -38,4 +43,25 @@ pub enum Error {
     Timeout,
     HostUnreachable,
     NoMatchingInterface,
+}
+
+
+impl Error {
+    pub fn kind(&self) -> ErrorKind {
+        self.kind
+    }
+}
+
+impl From<ErrorKind> for Error {
+    fn from(kind: ErrorKind) -> Self {
+        Self {
+            kind
+        }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{:?}", self.kind)
+    }
 }

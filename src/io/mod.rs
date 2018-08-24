@@ -22,3 +22,4 @@ macro_rules! println {
 }
 
 pub use crate::sys::Error;
+pub use crate::sys::ErrorKind;

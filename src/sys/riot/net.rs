@@ -1,6 +1,6 @@
 use core::mem;
 use core::ptr;
-use crate::io::{self, Error};
+use crate::io::{self, Error, ErrorKind};
 use crate::net;
 use riot_sys::ffi;
 
@@ -24,9 +24,9 @@ impl UdpSocket {
         let error = unsafe { ffi::sock_udp_create(&mut sock_udp, &local, remote, 0) };
 
         match error {
-            error if error == -(ffi::EADDRINUSE as i32) => Err(Error::AddrInUse),
-            error if error == -(ffi::EAFNOSUPPORT as i32) => Err(Error::AfNoSupport),
-            error if error == -(ffi::EINVAL as i32) => Err(Error::InvalidInput),
+            error if error == -(ffi::EADDRINUSE as i32) => Err(ErrorKind::AddrInUse.into()),
+            error if error == -(ffi::EAFNOSUPPORT as i32) => Err(ErrorKind::AfNoSupport.into()),
+            error if error == -(ffi::EINVAL as i32) => Err(ErrorKind::InvalidInput.into()),
             0 => {
                 let inner = sock_udp;
                 Ok(UdpSocket { inner })
@@ -65,13 +65,13 @@ impl UdpSocket {
         let endpoint = SocketAddr::new(addr, remote.port);
 
         match error {
-            error if error == -(ffi::EADDRNOTAVAIL as isize) => Err(Error::AddrMissing),
-            error if error == -(ffi::EAGAIN as isize) => Err(Error::WouldBlock),
-            error if error == -(ffi::EINVAL as isize) => Err(Error::InvalidInput),
-            error if error == -(ffi::ENOBUFS as isize) => Err(Error::BufferToSmall),
-            error if error == -(ffi::ENOMEM as isize) => Err(Error::OutOfMemory),
-            error if error == -(ffi::EPROTO as isize) => Err(Error::Protocol),
-            error if error == -(ffi::ETIMEDOUT as isize) => Err(Error::Timeout),
+            error if error == -(ffi::EADDRNOTAVAIL as isize) => Err(ErrorKind::AddrMissing.into()),
+            error if error == -(ffi::EAGAIN as isize) => Err(ErrorKind::WouldBlock.into()),
+            error if error == -(ffi::EINVAL as isize) => Err(ErrorKind::InvalidInput.into()),
+            error if error == -(ffi::ENOBUFS as isize) => Err(ErrorKind::BufferToSmall.into()),
+            error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory.into()),
+            error if error == -(ffi::EPROTO as isize) => Err(ErrorKind::Protocol.into()),
+            error if error == -(ffi::ETIMEDOUT as isize) => Err(ErrorKind::Timeout.into()),
             size if size >= 0 => Ok((size as _, endpoint)),
             _ => unreachable!("Unknown error occured. RIOT API changed."),
         }
@@ -117,11 +117,11 @@ impl UdpSocket {
             unsafe { ffi::sock_udp_send(&mut self.inner, buf.as_ptr() as _, buf.len(), &remote) };
 
         match error {
-            error if error == -(ffi::EADDRINUSE as isize) => Err(Error::AddrInUse),
-            error if error == -(ffi::EAFNOSUPPORT as isize) => Err(Error::AfNoSupport),
-            error if error == -(ffi::EHOSTUNREACH as isize) => Err(Error::HostUnreachable),
-            error if error == -(ffi::EINVAL as isize) => Err(Error::InvalidInput),
-            error if error == -(ffi::ENOMEM as isize) => Err(Error::OutOfMemory),
+            error if error == -(ffi::EADDRINUSE as isize) => Err(ErrorKind::AddrInUse.into()),
+            error if error == -(ffi::EAFNOSUPPORT as isize) => Err(ErrorKind::AfNoSupport.into()),
+            error if error == -(ffi::EHOSTUNREACH as isize) => Err(ErrorKind::HostUnreachable.into()),
+            error if error == -(ffi::EINVAL as isize) => Err(ErrorKind::InvalidInput.into()),
+            error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory.into()),
             error if error == -(ffi::ENOTCONN as isize) => unreachable!("NULL cannot be passed"),
             size if size >= 0 => Ok(size as _),
             _ => unreachable!("Unknown error occurred. RIOT API changed."),
@@ -139,7 +139,7 @@ impl UdpSocket {
         multiaddr: &Ipv6Address,
         interface: u32,
     ) -> Result<(), Error> {
-        let interface = find_interface(interface).ok_or(Error::NoMatchingInterface)?;
+        let interface = find_interface(interface).ok_or(ErrorKind::NoMatchingInterface)?;
 
         let mut addr_buffer = [0; 16];
         addr_buffer.copy_from_slice(multiaddr.as_bytes());
@@ -149,8 +149,8 @@ impl UdpSocket {
         let error = unsafe { ffi::gnrc_netif_ipv6_group_join(interface, &mut multiaddr) };
 
         match error {
-            error if error == -(ffi::ENOMEM as i32) => Err(Error::OutOfMemory),
-            error if error == -(ffi::ENOTSUP as i32) => Err(Error::NotSupported),
+            error if error == -(ffi::ENOMEM as i32) => Err(ErrorKind::OutOfMemory.into()),
+            error if error == -(ffi::ENOTSUP as i32) => Err(ErrorKind::NotSupported.into()),
             size if size == mem::size_of::<ffi::ipv6_addr_t>() as _ => Ok(()),
             _ => unreachable!("Unknown error occurred. RIOT API changed"),
         }
@@ -162,7 +162,7 @@ impl UdpSocket {
         multiaddr: &Ipv6Address,
         interface: u32,
     ) -> Result<(), io::Error> {
-        let interface = find_interface(interface).ok_or(Error::NoMatchingInterface)?;
+        let interface = find_interface(interface).ok_or(ErrorKind::NoMatchingInterface)?;
 
         let mut addr_buffer = [0; 16];
         addr_buffer.copy_from_slice(multiaddr.as_bytes());
@@ -171,7 +171,7 @@ impl UdpSocket {
         let error = unsafe { ffi::gnrc_netif_ipv6_group_leave(interface, &mut multiaddr) };
 
         match error {
-            error if error == -(ffi::ENOTSUP as i32) => Err(Error::NotSupported),
+            error if error == -(ffi::ENOTSUP as i32) => Err(ErrorKind::NotSupported.into()),
             size if size == mem::size_of::<ffi::ipv6_addr_t>() as _ => Ok(()),
             _ => unreachable!("Unknown error occured. RIOT API changed"),
         }

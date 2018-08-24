@@ -7,6 +7,15 @@ pub struct UdpSocket(sys::UdpSocket);
 
 type Result<T = ()> = ::core::result::Result<T, io::Error>;
 
+#[cfg(not(target_os="riot"))]
+pub const IPV6_LINK_LOCAL_ALL_ROUTERS: Ipv6Address = Ipv6Address::new(
+    0xff02, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0002,
+);
+
+#[cfg(target_os="riot")]
+pub const IPV6_LINK_LOCAL_ALL_ROUTERS: Ipv6Address = Ipv6Address::LINK_LOCAL_ALL_ROUTERS;
+
+
 impl UdpSocket {
     pub fn bind<A>(addr: A) -> Result<UdpSocket>
     where

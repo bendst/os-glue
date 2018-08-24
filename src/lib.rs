@@ -1,7 +1,19 @@
 //! Provide obstractions for embedded OS.
+//!
+//! On tier 1 and 2 targets the os-glue just wraps the underlying stdlib functionality
+//! On tier 3 it is hightly dependant on the used IoT operating system
+//!
+//! For using tier 3 you must always provide a feature flag for particular board.
+//!
+//! # Currently Supported Tier 3 operating system
+//!
+//! - RIOT
+//!
+//!
 
 #![feature(alloc)]
 #![feature(fnbox)]
+#![cfg_attr(not(target_os = "riot"), feature(const_ip))]
 #![feature(used)]
 #![feature(const_fn)]
 #![feature(box_syntax)]
@@ -18,16 +30,12 @@ extern crate std;
 #[cfg(feature = "std")]
 extern crate mac_address;
 
-//#[cfg(feature = "std")]
-//extern crate time as time2;
-
 #[cfg(feature = "std")]
 extern crate spin;
 
 #[cfg(target_os = "riot")]
 extern crate riot_sys;
 
-extern crate smoltcp;
 
 /// Re-export of the underlying bindings.
 ///
@@ -52,10 +60,7 @@ pub mod sync;
 
 /// Temporal quantification.
 pub mod time;
-
 pub mod net;
-
 pub mod error;
-
 #[macro_use]
 pub mod io;

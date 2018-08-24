@@ -2,7 +2,7 @@
 mod std_x86_64 {
     use crate::net;
 
-    pub use std::io::Error;
+    pub use std::io::{Error, ErrorKind};
     pub use std::net::{
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
