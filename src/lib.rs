@@ -14,7 +14,6 @@
 #![feature(alloc)]
 #![feature(fnbox)]
 #![cfg_attr(not(target_os = "riot"), feature(const_ip))]
-#![feature(used)]
 #![feature(const_fn)]
 #![feature(box_syntax)]
 #![no_std]

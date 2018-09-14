@@ -113,7 +113,7 @@ mod std_x86_64 {
     impl From<(i32, u32)> for Instant {
         fn from((sec, nsec): (i32, u32)) -> Self {
             Instant {
-                timespec: time::Timespec::new(sec as _, nsec as _),
+                timespec: time::Timespec::new(i64::from(sec), nsec as _),
             }
         }
     }
