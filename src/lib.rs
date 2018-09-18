@@ -35,7 +35,6 @@ extern crate spin;
 #[cfg(target_os = "riot")]
 extern crate riot_sys;
 
-
 /// Re-export of the underlying bindings.
 ///
 /// Expose constants and bindings.
@@ -57,9 +56,9 @@ pub mod thread;
 /// Provide syncronizations primitives of the underlying OS.
 pub mod sync;
 
+pub mod error;
+pub mod net;
 /// Temporal quantification.
 pub mod time;
-pub mod net;
-pub mod error;
 #[macro_use]
 pub mod io;

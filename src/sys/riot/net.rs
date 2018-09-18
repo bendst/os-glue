@@ -14,7 +14,7 @@ impl UdpSocket {
     #[inline]
     pub fn bind(local: SocketAddr) -> Result<Self, io::Error> {
         // Will be set initialized by sock_udp_create
-        let mut sock_udp: ffi::sock_udp_t = unsafe { mem::uninitialized() };
+        let mut sock_udp = unsafe { mem::zeroed() };
 
         // Do not configure a remote
         let remote = ptr::null_mut();
@@ -37,7 +37,7 @@ impl UdpSocket {
 
     #[inline]
     pub fn recv_from(&mut self, buf: &mut [u8]) -> Result<(usize, SocketAddr), io::Error> {
-        let mut remote: ffi::sock_udp_ep_t = unsafe { mem::zeroed() };
+        let mut remote = unsafe { mem::zeroed() };
         let error = unsafe {
             ffi::sock_udp_recv(
                 &mut self.inner,
@@ -59,7 +59,7 @@ impl UdpSocket {
                 let ipv4 = unsafe { remote.addr.ipv4 };
                 Ipv4Address::from_bytes(&ipv4).into()
             }
-            _ => panic!("Unknown af family"),
+            _ => panic!("Unknown AF family"),
         };
 
         let endpoint = SocketAddr::new(addr, remote.port);
@@ -119,7 +119,9 @@ impl UdpSocket {
         match error {
             error if error == -(ffi::EADDRINUSE as isize) => Err(ErrorKind::AddrInUse.into()),
             error if error == -(ffi::EAFNOSUPPORT as isize) => Err(ErrorKind::AfNoSupport.into()),
-            error if error == -(ffi::EHOSTUNREACH as isize) => Err(ErrorKind::HostUnreachable.into()),
+            error if error == -(ffi::EHOSTUNREACH as isize) => {
+                Err(ErrorKind::HostUnreachable.into())
+            }
             error if error == -(ffi::EINVAL as isize) => Err(ErrorKind::InvalidInput.into()),
             error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory.into()),
             error if error == -(ffi::ENOTCONN as isize) => unreachable!("NULL cannot be passed"),

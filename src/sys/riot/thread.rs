@@ -2,6 +2,7 @@ use alloc::boxed::Box;
 use alloc::boxed::FnBox;
 use alloc::vec::Vec;
 use core::marker::PhantomData;
+use core::mem;
 use core::ptr;
 pub use core::time::Duration;
 use crate::thread;
@@ -82,17 +83,13 @@ pub fn park_timeout(_duration: Duration) {
 
 #[inline]
 unsafe fn spawn_inner<'a>(
-    f: Box<FnBox() -> () + Send + 'a>,
+    p: Box<dyn FnBox() -> () + Send + 'a>,
     name: &'static str,
     stack_size: i32,
     flags: i32,
     priority: u32,
 ) -> Result<JoinHandle<()>, thread::SpawnError> {
-    // Directly allocate our 'heap'
-    let f = box f;
-
-    // extract the parameters, which will be the environment of the closure
-    let param_ptr = &*f as *const _ as *mut _;
+    let p = box p;
 
     let mut buffer = Vec::with_capacity(stack_size as usize);
 
@@ -102,23 +99,31 @@ unsafe fn spawn_inner<'a>(
         priority as _,
         flags,
         Some(thread_start),
-        param_ptr,
+        &*p as *const _ as *mut _, // Parameters
         name.as_ptr(),
     );
 
     assert!(id > 0, "thread id is invalid");
 
     extern "C" fn thread_start(main: *mut ffi::c_void) -> *mut ffi::c_void {
-        unsafe { Box::from_raw(main as *mut Box<FnBox()>)() }
+        unsafe { Box::from_raw(main as *mut Box<dyn FnBox()>)() }
         ptr::null_mut()
     }
 
-    Ok(JoinHandle {
-        _marker: PhantomData,
-        thread: Thread { id: ThreadId(id) },
-        stack_buffer: buffer,
-        result: None,
-    })
+    match id {
+        error if error == -(ffi::EINVAL as i16) => Err(thread::SpawnError::SpawnFailed),
+        error if error == -(ffi::EOVERFLOW as i16) => Err(thread::SpawnError::SpawnFailed),
+        pid => {
+            mem::forget(p); // Everything passed to the thread context
+
+            Ok(JoinHandle {
+                _marker: PhantomData,
+                thread: Thread { id: ThreadId(pid) },
+                stack_buffer: buffer,
+                result: None,
+            })
+        }
+    }
 }
 
 #[inline]

@@ -20,7 +20,7 @@ impl Instant {
     }
 
     #[inline]
-    pub fn duration_since(&self, earlier: Instant) -> Duration {
+    pub fn duration_since(self, earlier: Instant) -> Duration {
         let duration = unsafe { ffi::timex_sub(self.timestamp, earlier.timestamp) };
         // TODO: check overflowing behaviour
         let nanos = duration.microseconds.saturating_mul(1000);
@@ -28,9 +28,9 @@ impl Instant {
     }
 
     #[inline]
-    pub fn elapsed(&self) -> Duration {
+    pub fn elapsed(self) -> Duration {
         let now = Instant::now();
-        now.duration_since(*self)
+        now.duration_since(self)
     }
 
     pub fn add_duration(self, duration: Duration) -> Instant {

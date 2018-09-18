@@ -11,8 +11,7 @@ fn update_readme() {
         .as_mut()
         .map(|file| {
             file.write(readme.as_bytes()).unwrap();
-        })
-        .unwrap();
+        }).unwrap();
 }
 
 fn main() {

@@ -45,7 +45,6 @@ pub enum ErrorKind {
     NoMatchingInterface,
 }
 
-
 impl Error {
     pub fn kind(&self) -> ErrorKind {
         self.kind
@@ -54,9 +53,7 @@ impl Error {
 
 impl From<ErrorKind> for Error {
     fn from(kind: ErrorKind) -> Self {
-        Self {
-            kind
-        }
+        Self { kind }
     }
 }
 

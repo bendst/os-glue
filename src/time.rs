@@ -25,12 +25,12 @@ impl Instant {
     ///
     /// # Panics
     /// This function can panic in some cases when `earlier` is later than self.
-    pub fn duration_since(&self, earlier: Instant) -> Duration {
+    pub fn duration_since(self, earlier: Instant) -> Duration {
         self.0.duration_since(earlier.0)
     }
 
     /// Returns the amount of time elasped since this instant was created.
-    pub fn elapsed(&self) -> Duration {
+    pub fn elapsed(self) -> Duration {
         self.0.elapsed()
     }
 }
