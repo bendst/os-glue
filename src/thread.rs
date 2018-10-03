@@ -1,12 +1,44 @@
 // Configure the module which shall be use
 // * RIOT
 use crate::sys;
-pub use crate::sys::Builder;
 pub use crate::sys::Thread;
 use crate::time;
 
 /// An owned permission to join on a thread (block on its termination).
 pub struct JoinHandle(sys::JoinHandle<()>);
+pub struct Builder<T>(T);
+
+impl BuilderExt for Builder<sys::Builder> {
+    type JoinHandle = <sys::Builder as BuilderExt>::JoinHandle;
+
+    fn new() -> Self {
+        Builder(sys::Builder::new())
+    }
+
+    fn name(self, name: &'static str) -> Self {
+        Builder(<sys::Builder as BuilderExt>::name(self.0, name))
+    }
+
+    fn stack_size(self, stack_size: i32) -> Self {
+        Builder(<sys::Builder as BuilderExt>::stack_size(self.0, stack_size))
+    }
+
+    fn priority(self, priority: u32) -> Self {
+        Builder(self.0.priority(priority))
+    }
+
+    fn flags(self, flags: i32) -> Self {
+        Builder(self.0.flags(flags))
+    }
+
+    fn spawn<F>(self, f: F) -> Result<Self::JoinHandle, SpawnError>
+    where
+        F: FnOnce() -> (),
+        F: Send + 'static,
+    {
+        <sys::Builder as BuilderExt>::spawn(self.0, f)
+    }
+}
 
 impl JoinHandle {
     pub fn thread(&self) -> &sys::Thread {
@@ -37,7 +69,7 @@ where
     F: FnOnce() -> (),
     F: Send + 'static,
 {
-    sys::spawn::<_, sys::Builder>(f)
+    sys::spawn::<_, Builder<_>>(f)
 }
 
 /// Gets a handle to the thread that invokes it.

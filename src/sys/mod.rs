@@ -8,8 +8,9 @@ mod std_x86_64 {
         UdpSocket,
     };
     use std::ops::{Add, Sub};
+    pub(crate) use std::thread::Builder;
     pub use std::thread::{
-        current, panicking, park, park_timeout, sleep, yield_now, Builder, JoinHandle, Thread,
+        current, panicking, park, park_timeout, sleep, yield_now, JoinHandle, Thread,
     };
     pub use std::time::Duration;
 
