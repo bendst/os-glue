@@ -2,17 +2,18 @@
 mod std_x86_64 {
     use crate::net;
 
-    pub use std::io::{Error, ErrorKind};
-    pub use std::net::{
+    use crate::std::fmt;
+    pub use crate::std::io::{Error, ErrorKind};
+    pub use crate::std::net::{
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
     };
-    use std::ops::{Add, Sub};
-    pub(crate) use std::thread::Builder;
-    pub use std::thread::{
+    use crate::std::ops::{Add, Sub};
+    pub(crate) use crate::std::thread::Builder;
+    pub use crate::std::thread::{
         current, panicking, park, park_timeout, sleep, yield_now, JoinHandle, Thread,
     };
-    pub use std::time::Duration;
+    pub use crate::std::time::Duration;
 
     use crate::thread;
 
@@ -50,13 +51,11 @@ mod std_x86_64 {
         B::new().spawn(f).expect("thread spawn failed")
     }
 
-    use std::fmt;
-
     #[allow(dead_code)]
     #[doc(hidden)]
     pub fn _print(args: fmt::Arguments) {
-        use std::io;
-        use std::io::Write;
+        use crate::std::io;
+        use crate::std::io::Write;
 
         let stdout = io::stdout();
         let mut guard = stdout.lock();
