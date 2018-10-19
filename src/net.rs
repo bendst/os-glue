@@ -5,7 +5,6 @@ pub use crate::sys::{IpAddress, Ipv4Address, Ipv6Address, SocketAddr};
 
 pub struct UdpSocket(sys::UdpSocket);
 
-type Result<T = ()> = core::result::Result<T, io::Error>;
 
 #[cfg(not(target_os = "riot"))]
 pub const IPV6_LOOPBACK: Ipv6Address = Ipv6Address::LOCALHOST;
@@ -23,32 +22,32 @@ pub const IPV6_LOOPBACK: Ipv6Address = Ipv6Address::LOOPBACK;
 pub const IPV6_UNSPECIFIED: Ipv6Address = Ipv6Address::UNSPECIFIED;
 
 impl UdpSocket {
-    pub fn bind<A>(addr: A) -> Result<UdpSocket>
+    pub fn bind<A>(addr: A) -> Result<UdpSocket, io::Error>
     where
         A: Into<sys::SocketAddr>,
     {
         Ok(UdpSocket(sys::UdpSocket::bind(addr.into())?))
     }
 
-    pub fn recv_from(&mut self, buf: &mut [u8]) -> Result<(usize, sys::SocketAddr)> {
+    pub fn recv_from(&mut self, buf: &mut [u8]) -> Result<(usize, sys::SocketAddr), io::Error> {
         self.0.recv_from(buf)
     }
 
-    pub fn send_to<A>(&mut self, buf: &[u8], addr: A) -> Result<usize>
+    pub fn send_to<A>(&mut self, buf: &[u8], addr: A) -> Result<usize, io::Error>
     where
         A: Into<sys::SocketAddr>,
     {
         self.0.send_to(buf, addr.into())
     }
 
-    pub fn join_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result
+    pub fn join_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result<(), io::Error>
     where
         A: Into<sys::Ipv6Address>,
     {
         self.0.join_multicast_v6(&multiaddr.into(), interface)
     }
 
-    pub fn leave_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result
+    pub fn leave_multicast<A>(&mut self, multiaddr: A, interface: u32) -> Result<(), io::Error>
     where
         A: Into<sys::Ipv6Address>,
     {

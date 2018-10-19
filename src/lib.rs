@@ -16,24 +16,11 @@
 #![cfg_attr(not(target_os = "riot"), feature(const_ip))]
 #![feature(const_fn)]
 #![feature(box_syntax)]
-#![no_std]
+#![cfg_attr(not(feature ="std"), no_std)]
 
 #[cfg(target_os = "none")]
 compile_error!(r#"`os_glue` currently has no target os specified. Thats probably an error."#);
 
-extern crate alloc;
-extern crate embedded_types;
-#[cfg(feature = "std")]
-extern crate std;
-
-#[cfg(feature = "std")]
-extern crate mac_address;
-
-#[cfg(feature = "std")]
-extern crate spin;
-
-#[cfg(target_os = "riot")]
-extern crate riot_sys;
 
 /// Re-export of the underlying bindings.
 ///

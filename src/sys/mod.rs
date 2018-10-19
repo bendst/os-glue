@@ -2,18 +2,18 @@
 mod std_x86_64 {
     use crate::net;
 
-    use crate::std::fmt;
-    pub use crate::std::io::{Error, ErrorKind};
-    pub use crate::std::net::{
+    use std::fmt;
+    pub use std::io::{Error, ErrorKind};
+    pub use std::net::{
         IpAddr as IpAddress, Ipv4Addr as Ipv4Address, Ipv6Addr as Ipv6Address, SocketAddr,
         UdpSocket,
     };
-    use crate::std::ops::{Add, Sub};
-    pub(crate) use crate::std::thread::Builder;
-    pub use crate::std::thread::{
+    use std::ops::{Add, Sub};
+    pub(crate) use std::thread::Builder;
+    pub use std::thread::{
         current, panicking, park, park_timeout, sleep, yield_now, JoinHandle, Thread,
     };
-    pub use crate::std::time::Duration;
+    pub use std::time::Duration;
 
     use crate::thread;
 
@@ -54,8 +54,8 @@ mod std_x86_64 {
     #[allow(dead_code)]
     #[doc(hidden)]
     pub fn _print(args: fmt::Arguments) {
-        use crate::std::io;
-        use crate::std::io::Write;
+        use std::io;
+        use std::io::Write;
 
         let stdout = io::stdout();
         let mut guard = stdout.lock();
