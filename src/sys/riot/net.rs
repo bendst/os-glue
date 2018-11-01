@@ -38,12 +38,16 @@ impl UdpSocket {
     #[inline]
     pub fn recv_from(&mut self, buf: &mut [u8]) -> Result<(usize, SocketAddr), io::Error> {
         let mut remote = unsafe { mem::zeroed() };
+        let timeout = 0;
+
+        assert_eq!(timeout, 0, "UdpSocket::recv_from should never block.");
+
         let error = unsafe {
             ffi::sock_udp_recv(
                 &mut self.inner,
                 buf.as_mut_ptr() as _,
                 buf.len(),
-                0,
+                timeout,
                 &mut remote,
             )
         };
@@ -71,7 +75,8 @@ impl UdpSocket {
             error if error == -(ffi::ENOBUFS as isize) => Err(ErrorKind::BufferToSmall.into()),
             error if error == -(ffi::ENOMEM as isize) => Err(ErrorKind::OutOfMemory.into()),
             error if error == -(ffi::EPROTO as isize) => Err(ErrorKind::Protocol.into()),
-            error if error == -(ffi::ETIMEDOUT as isize) => Err(ErrorKind::Timeout.into()),
+            // A timeout would be a would block, as the timeout is always 0.
+            error if error == -(ffi::ETIMEDOUT as isize) => Err(ErrorKind::WouldBlock.into()),
             size if size >= 0 => Ok((size as _, endpoint)),
             _ => unreachable!("Unknown error occured. RIOT API changed."),
         }
@@ -177,6 +182,13 @@ impl UdpSocket {
             size if size == mem::size_of::<ffi::ipv6_addr_t>() as _ => Ok(()),
             _ => unreachable!("Unknown error occured. RIOT API changed"),
         }
+    }
+
+    #[inline]
+    pub fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<(), io::Error> {
+        // The timeout on recvs is should always be zero,
+        // so a RIOT UdpSocket is always nonblocking.
+        Ok(())
     }
 }
 

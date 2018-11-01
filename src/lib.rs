@@ -16,11 +16,10 @@
 #![cfg_attr(not(target_os = "riot"), feature(const_ip))]
 #![feature(const_fn)]
 #![feature(box_syntax)]
-#![cfg_attr(not(feature ="std"), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(target_os = "none")]
 compile_error!(r#"`os_glue` currently has no target os specified. Thats probably an error."#);
-
 
 /// Re-export of the underlying bindings.
 ///
@@ -43,7 +42,7 @@ pub mod thread;
 /// Provide syncronizations primitives of the underlying OS.
 pub mod sync;
 
-pub mod error;
+//pub mod error;
 pub mod net;
 /// Temporal quantification.
 pub mod time;

@@ -5,7 +5,6 @@ pub use crate::sys::{IpAddress, Ipv4Address, Ipv6Address, SocketAddr};
 
 pub struct UdpSocket(sys::UdpSocket);
 
-
 #[cfg(not(target_os = "riot"))]
 pub const IPV6_LOOPBACK: Ipv6Address = Ipv6Address::LOCALHOST;
 
@@ -52,6 +51,10 @@ impl UdpSocket {
         A: Into<sys::Ipv6Address>,
     {
         self.0.leave_multicast_v6(&multiaddr.into(), interface)
+    }
+
+    pub fn set_nonblocking(&mut self, nonblocking: bool) -> Result<(), io::Error> {
+        self.0.set_nonblocking(nonblocking)
     }
 }
 
