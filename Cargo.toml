@@ -14,7 +14,7 @@ time = {version = "0.1.4", optional = true }
 
 [dependencies.smoltcp]
 git = "https://github.com/m-labs/smoltcp.git"
-version = "0.4"
+version = "0.5"
 default-features = false
 features = ["proto-ipv4", "proto-ipv6"]
 
