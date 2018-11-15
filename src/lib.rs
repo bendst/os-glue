@@ -16,7 +16,10 @@
 #![cfg_attr(not(target_os = "riot"), feature(const_ip))]
 #![feature(const_fn)]
 #![feature(box_syntax)]
+#![feature(extern_crate_item_prelude)]
 #![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
 
 #[cfg(target_os = "none")]
 compile_error!(r#"`os_glue` currently has no target os specified. Thats probably an error."#);
