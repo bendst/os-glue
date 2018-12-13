@@ -1,11 +1,11 @@
-//! Provide obstractions for embedded OS.
+//! Provide abstractions for embedded OS.
 //!
-//! On tier 1 and 2 targets the os-glue just wraps the underlying stdlib functionality
-//! On tier 3 it is hightly dependant on the used IoT operating system
+//! os-glue wraps for tier 1 and 2 the underlying standard library functionality.
+//! For tier 3 it attempts to provide similaiar functionality, but it is hightly dependant on the OS.
 //!
-//! For using tier 3 you must always provide a feature flag for particular board.
+//! You must provide a feature flag for the board for tier 3.
 //!
-//! # Currently Supported Tier 3 operating system
+//! # Supported Tier 3 OS
 //!
 //! - RIOT
 //!
